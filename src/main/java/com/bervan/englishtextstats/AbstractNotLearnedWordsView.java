@@ -41,7 +41,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     }
 
     @Override
-    protected void openEditDialog(ItemClickEvent<Word> event) {
+    protected void openClickOnColumnDialog(ItemClickEvent<Word> event) {
         Dialog dialog = new Dialog();
         dialog.setWidth("80vw");
 
