@@ -1,6 +1,10 @@
 package com.bervan.englishtextstats;
 
-public class Word {
+import com.bervan.common.model.PersistableTableData;
+
+import java.util.Objects;
+
+public class Word implements PersistableTableData {
     private String name;
     private Long count;
     private String translation;
@@ -40,4 +44,17 @@ public class Word {
         return
                 name + " - " + count;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Word word)) return false;
+        return Objects.equals(name, word.name) && Objects.equals(count, word.count) && Objects.equals(translation, word.translation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, count, translation);
+    }
+
 }

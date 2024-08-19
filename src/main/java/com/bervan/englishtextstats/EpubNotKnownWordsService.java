@@ -11,9 +11,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Component
-public class EpubNotKnownWords {
+public class EpubNotKnownWordsService {
 
     private final Set<String> inMemoryWords = new HashSet<>();
+    private String actualEbook = "freud-dream-psychology.epub";
 
     public void loadIntoMemory() {
         try {
@@ -67,7 +68,7 @@ public class EpubNotKnownWords {
 
         try {
             // Extract text from EPUB file
-            String extractedText = getEpubText("./english-text-stats-app/epubs/freud-dream-psychology.epub");
+            String extractedText = getEpubText("./english-text-stats-app/epubs/" + actualEbook);
 
             // Preprocess text: remove non-alphabetic characters and convert to lower case
             List<String> words = filterWords(
@@ -194,5 +195,13 @@ public class EpubNotKnownWords {
             }
         }
         return filteredWords;
+    }
+
+    public String getActualEpub() {
+        return actualEbook;
+    }
+
+    public void setActualEpub(String actualEbook) {
+        this.actualEbook = actualEbook;
     }
 }
