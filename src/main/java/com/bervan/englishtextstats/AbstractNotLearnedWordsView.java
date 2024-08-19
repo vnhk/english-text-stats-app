@@ -1,7 +1,6 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.AbstractTableView;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -10,20 +9,25 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word> {
     public static final String ROUTE_NAME = "english-epub-words/not-learned-yet";
 
+    private final EpubPathLayout epubPathLayout;
 
-    public AbstractNotLearnedWordsView(@Autowired WordService service) {
+    public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout) {
         super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:");
-
-        add(new Text("Actual ebook: " + service.getActualEpub()));
+        this.epubPathLayout = epubPathLayout;
+        add(epubPathLayout);
+        refreshData();
 
         remove(addButton);
+    }
+
+    @Override
+    protected void refreshData() {
+        epubPathLayout.refreshServiceActualEpub();
+        super.refreshData();
     }
 
     @Override

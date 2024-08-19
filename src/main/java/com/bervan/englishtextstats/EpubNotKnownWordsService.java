@@ -1,6 +1,8 @@
 package com.bervan.englishtextstats;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -10,11 +12,13 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-@Component
+@Service
 public class EpubNotKnownWordsService {
+    @Value("${file.service.storage.folder}")
+    private String pathToEpubs;
 
     private final Set<String> inMemoryWords = new HashSet<>();
-    private String actualEbook = "freud-dream-psychology.epub";
+    private String actualEbook = null;
 
     public void loadIntoMemory() {
         try {
@@ -61,16 +65,19 @@ public class EpubNotKnownWordsService {
     }
 
     public List<Word> getNotLearnedWords(int howMany) {
+        if (actualEbook == null) {
+            return new ArrayList<>();
+        }
+
         if (inMemoryWords.isEmpty()) {
             loadIntoMemory();
         }
+
         List<Word> resultComplete = new ArrayList<>();
 
         try {
-            // Extract text from EPUB file
-            String extractedText = getEpubText("./english-text-stats-app/epubs/" + actualEbook);
+            String extractedText = getEpubText(pathToEpubs + File.separator + actualEbook);
 
-            // Preprocess text: remove non-alphabetic characters and convert to lower case
             List<String> words = filterWords(
                     Arrays.stream(extractedText.toLowerCase().split("\\W+"))
                             .filter(word -> word.length() >= 3)
@@ -94,14 +101,6 @@ public class EpubNotKnownWordsService {
 
             // Translate words to Polish
             Map<String, String> translations = new HashMap<>();
-            translations.put("people", "ludzie");
-            translations.put("history", "historia");
-            translations.put("human", "człowiek");
-            translations.put("society", "społeczeństwo");
-            translations.put("development", "rozwój");
-            translations.put("political", "polityczny");
-            translations.put("system", "system");
-            translations.put("economy", "gospodarka");
 
             // Prepare and print results
             for (Map.Entry<String, Long> entry : sortedWordsComplete) {
@@ -160,12 +159,10 @@ public class EpubNotKnownWordsService {
 
         boolean insideBody = false;
         while ((line = reader.readLine()) != null) {
-            // Wyszukiwanie początku <body> i końca </body>
             if (line.contains("<body")) {
                 insideBody = true;
             }
             if (insideBody) {
-                // Usuwanie prostych znaczników HTML
                 content.append(line.replaceAll("<[^>]+>", "")).append("\n");
             }
             if (line.contains("</body>")) {
