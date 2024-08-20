@@ -3,11 +3,15 @@ package com.bervan.englishtextstats;
 import com.bervan.common.AbstractOneValueView;
 import com.bervan.common.model.BaseOneValue;
 import com.bervan.common.onevalue.OneValueService;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopeMetadata;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class EpubPathLayout extends AbstractOneValueView {
 
     public static final String actualEpubPath = "actualEpubPath";
