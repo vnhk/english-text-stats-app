@@ -4,6 +4,7 @@ import com.bervan.common.service.BaseService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class WordService implements BaseService<Word> {
@@ -26,7 +27,7 @@ public class WordService implements BaseService<Word> {
     }
 
     @Override
-    public List<Word> load() {
+    public Set<Word> load() {
         return epubNotKnownWordsService.getNotLearnedWords(100);
     }
 

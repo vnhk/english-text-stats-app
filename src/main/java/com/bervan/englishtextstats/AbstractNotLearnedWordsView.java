@@ -18,10 +18,11 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout) {
         super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:");
         this.epubPathLayout = epubPathLayout;
+        renderCommonComponents();
         add(epubPathLayout);
         refreshData();
 
-        remove(addButton);
+        contentLayout.remove(addButton);
     }
 
     @Override
@@ -45,7 +46,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     }
 
     @Override
-    protected void openClickOnColumnDialog(ItemClickEvent<Word> event) {
+    protected void doOnColumnClick(ItemClickEvent<Word> event) {
         Dialog dialog = new Dialog();
         dialog.setWidth("80vw");
 

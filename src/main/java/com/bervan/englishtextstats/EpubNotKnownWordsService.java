@@ -1,7 +1,6 @@
 package com.bervan.englishtextstats;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -64,9 +63,9 @@ public class EpubNotKnownWordsService {
         inMemoryWords.add(word);
     }
 
-    public List<Word> getNotLearnedWords(int howMany) {
+    public Set<Word> getNotLearnedWords(int howMany) {
         if (actualEbook == null) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
 
         if (inMemoryWords.isEmpty()) {
@@ -111,7 +110,7 @@ public class EpubNotKnownWordsService {
             throw new RuntimeException("Could not extract english words.");
         }
 
-        List<Word> resultReduced = new ArrayList<>();
+        Set<Word> resultReduced = new HashSet<>();
 
         for (int i = 0; i < Math.min(howMany, resultComplete.size()); i++) {
             resultReduced.add(resultComplete.get(i));
