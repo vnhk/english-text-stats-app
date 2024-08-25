@@ -1,5 +1,6 @@
 package com.bervan.englishtextstats;
 
+import com.bervan.common.model.BervanLogger;
 import com.bervan.common.service.FileBasedConfigUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,17 @@ public class EpubNotKnownWordsService {
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
 
-    @Value("${ebook-not-known-words.path-in-file-storage}")
+    @Value("${ebook-not-known-words.file-storage-relative-path}")
     private String appConfigFolder;
+
+    private final BervanLogger logger;
 
     private final Set<String> inMemoryWords = new HashSet<>();
     private String actualEbook = null;
+
+    public EpubNotKnownWordsService(BervanLogger logger) {
+        this.logger = logger;
+    }
 
     public void loadIntoMemory() {
         try {
@@ -33,6 +40,7 @@ public class EpubNotKnownWordsService {
                     });
             inMemoryWords.addAll(knownWords);
         } catch (Exception e) {
+            logger.logError("Could not load learned words.", e);
             throw new RuntimeException("Could not load learned words.");
         }
     }
@@ -63,7 +71,7 @@ public class EpubNotKnownWordsService {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.logError("Could not create or append file with known words!");
                 }
             }
         }
@@ -114,6 +122,7 @@ public class EpubNotKnownWordsService {
                 resultComplete.add(new Word(entry.getKey(), entry.getValue(), translation));
             }
         } catch (Exception e) {
+            logger.logError("Could not extract english words.", e);
             throw new RuntimeException("Could not extract english words.");
         }
 
@@ -122,18 +131,18 @@ public class EpubNotKnownWordsService {
         for (int i = 0; i < Math.min(howMany, resultComplete.size()); i++) {
             resultReduced.add(resultComplete.get(i));
         }
-        System.out.println("All: " + resultComplete.size());
+        logger.logDebug("All Words Not Learned: " + resultComplete.size());
 
         return resultReduced;
     }
 
-    private static Set<String> loadWordsFromCSV(Path filePath) {
+    private Set<String> loadWordsFromCSV(Path filePath) {
         try {
             return Files.lines(filePath)
                     .flatMap(line -> Arrays.stream(line.split(",")))
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.logError("Could not load csv english words.", e);
         }
 
         return new HashSet<>();
@@ -152,7 +161,7 @@ public class EpubNotKnownWordsService {
                 zipInputStream.closeEntry();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.logError(e);
         }
 
         return textContent.toString();
