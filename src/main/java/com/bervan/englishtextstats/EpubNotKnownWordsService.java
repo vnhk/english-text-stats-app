@@ -1,11 +1,12 @@
 package com.bervan.englishtextstats;
 
+import com.bervan.common.service.FileBasedConfigUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -14,17 +15,23 @@ import java.util.zip.ZipInputStream;
 @Service
 public class EpubNotKnownWordsService {
     @Value("${file.service.storage.folder}")
-    private String pathToEpubs;
+    private String pathToFileStorage;
+
+    @Value("${ebook-not-known-words.path-in-file-storage}")
+    private String appConfigFolder;
 
     private final Set<String> inMemoryWords = new HashSet<>();
     private String actualEbook = null;
 
     public void loadIntoMemory() {
         try {
-            Set<String> a1_a2_words_dynamic = loadWordsFromCSV("./english-text-stats-app/knownWords_large.csv");
-            a1_a2_words_dynamic.addAll(loadWordsFromCSV("./english-text-stats-app/knownWords1.csv"));
-            a1_a2_words_dynamic.addAll(loadWordsFromCSV("./english-text-stats-app/knownWords2.csv"));
-            inMemoryWords.addAll(a1_a2_words_dynamic);
+            Set<String> knownWords = new HashSet<>();
+            FileBasedConfigUtils.loadFilesInStorageFolder(pathToFileStorage, appConfigFolder)
+                    .stream().filter(File::isFile).filter(f -> f.getName().endsWith(".csv"))
+                    .forEach(f -> {
+                        knownWords.addAll(loadWordsFromCSV(f.toPath()));
+                    });
+            inMemoryWords.addAll(knownWords);
         } catch (Exception e) {
             throw new RuntimeException("Could not load learned words.");
         }
@@ -35,7 +42,7 @@ public class EpubNotKnownWordsService {
             return;
         }
 
-        File file = new File("./english-text-stats-app/knownWords2.csv");
+        File file = new File(pathToFileStorage + appConfigFolder + File.separator + "app-knownWords.csv");
         FileWriter writer = null;
 
         try {
@@ -75,7 +82,7 @@ public class EpubNotKnownWordsService {
         List<Word> resultComplete = new ArrayList<>();
 
         try {
-            String extractedText = getEpubText(pathToEpubs + File.separator + actualEbook);
+            String extractedText = getEpubText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
 
             List<String> words = filterWords(
                     Arrays.stream(extractedText.toLowerCase().split("\\W+"))
@@ -120,9 +127,9 @@ public class EpubNotKnownWordsService {
         return resultReduced;
     }
 
-    private static Set<String> loadWordsFromCSV(String filePath) {
+    private static Set<String> loadWordsFromCSV(Path filePath) {
         try {
-            return Files.lines(Paths.get(filePath))
+            return Files.lines(filePath)
                     .flatMap(line -> Arrays.stream(line.split(",")))
                     .collect(Collectors.toSet());
         } catch (Exception e) {
