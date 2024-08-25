@@ -41,7 +41,6 @@ public class EpubNotKnownWordsService {
             inMemoryWords.addAll(knownWords);
         } catch (Exception e) {
             logger.logError("Could not load learned words.", e);
-            throw new RuntimeException("Could not load learned words.");
         }
     }
 
