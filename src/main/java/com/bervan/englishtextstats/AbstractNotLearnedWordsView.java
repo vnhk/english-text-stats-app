@@ -12,9 +12,9 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word> {
     public static final String ROUTE_NAME = "english-epub-words/not-learned-yet";
-
+    protected HorizontalLayout dialogButtonsLayout;
     private final EpubPathLayout epubPathLayout;
-
+    protected Dialog dialog;
     public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout) {
         super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:");
         this.epubPathLayout = epubPathLayout;
@@ -47,12 +47,13 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
 
     @Override
     protected void doOnColumnClick(ItemClickEvent<Word> event) {
-        Dialog dialog = new Dialog();
+        dialog = new Dialog();
         dialog.setWidth("80vw");
 
         VerticalLayout dialogLayout = new VerticalLayout();
 
         HorizontalLayout headerLayout = getDialogTopBarLayout(dialog);
+        dialogButtonsLayout = new HorizontalLayout();
 
         String clickedColumn = event.getColumn().getKey();
         TextArea field = new TextArea(clickedColumn);
@@ -69,7 +70,9 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
             dialog.close();
         });
 
-        dialogLayout.add(headerLayout, field, saveButton);
+        dialogButtonsLayout.add(saveButton);
+
+        dialogLayout.add(headerLayout, field, dialogButtonsLayout);
         dialog.add(dialogLayout);
         dialog.open();
     }
