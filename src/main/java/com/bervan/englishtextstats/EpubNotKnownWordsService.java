@@ -1,7 +1,7 @@
 package com.bervan.englishtextstats;
 
-import com.bervan.common.model.BervanLogger;
 import com.bervan.common.service.FileBasedConfigUtils;
+import com.bervan.core.model.BervanLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +40,7 @@ public class EpubNotKnownWordsService {
                     });
             inMemoryWords.addAll(knownWords);
         } catch (Exception e) {
-            logger.logError("Could not load learned words.", e);
+            logger.error("Could not load learned words.", e);
         }
     }
 
@@ -70,7 +70,7 @@ public class EpubNotKnownWordsService {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    logger.logError("Could not create or append file with known words!");
+                    logger.error("Could not create or append file with known words!");
                 }
             }
         }
@@ -121,7 +121,7 @@ public class EpubNotKnownWordsService {
                 resultComplete.add(new Word(entry.getKey(), entry.getValue(), translation));
             }
         } catch (Exception e) {
-            logger.logError("Could not extract english words.", e);
+            logger.error("Could not extract english words.", e);
             throw new RuntimeException("Could not extract english words.");
         }
 
@@ -130,7 +130,7 @@ public class EpubNotKnownWordsService {
         for (int i = 0; i < Math.min(howMany, resultComplete.size()); i++) {
             resultReduced.add(resultComplete.get(i));
         }
-        logger.logDebug("All Words Not Learned: " + resultComplete.size());
+        logger.debug("All Words Not Learned: " + resultComplete.size());
 
         return resultReduced;
     }
@@ -141,7 +141,7 @@ public class EpubNotKnownWordsService {
                     .flatMap(line -> Arrays.stream(line.split(",")))
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            logger.logError("Could not load csv english words.", e);
+            logger.error("Could not load csv english words.", e);
         }
 
         return new HashSet<>();
@@ -160,7 +160,7 @@ public class EpubNotKnownWordsService {
                 zipInputStream.closeEntry();
             }
         } catch (IOException e) {
-            logger.logError(e);
+            logger.error(e);
         }
 
         return textContent.toString();
