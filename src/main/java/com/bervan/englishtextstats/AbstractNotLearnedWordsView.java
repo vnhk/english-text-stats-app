@@ -4,7 +4,6 @@ import com.bervan.common.AbstractTableView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -46,20 +45,12 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     }
 
     @Override
-    protected void doOnColumnClick(ItemClickEvent<Word> event) {
-        dialog = new Dialog();
-        dialog.setWidth("80vw");
-
-        VerticalLayout dialogLayout = new VerticalLayout();
-
-        HorizontalLayout headerLayout = getDialogTopBarLayout(dialog);
+    protected void buildOnColumnClickDialogContent(Dialog dialog, VerticalLayout dialogLayout, HorizontalLayout headerLayout, String clickedColumn, Word item) {
         dialogButtonsLayout = new HorizontalLayout();
 
-        String clickedColumn = event.getColumn().getKey();
         TextArea field = new TextArea(clickedColumn);
         field.setWidth("100%");
 
-        Word item = event.getItem();
         field.setValue(item.getName());
 
         Button saveButton = new Button("Mark as learned.");
@@ -73,12 +64,15 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
         dialogButtonsLayout.add(saveButton);
 
         dialogLayout.add(headerLayout, field, dialogButtonsLayout);
-        dialog.add(dialogLayout);
-        dialog.open();
     }
 
     @Override
-    protected void openAddDialog() {
+    protected void newItemButtonClick() {
+        throw new RuntimeException("Open dialog is invalid");
+    }
+
+    @Override
+    protected void buildNewItemDialogContent(Dialog dialog, VerticalLayout dialogLayout, HorizontalLayout headerLayout) {
         throw new RuntimeException("Open dialog is invalid");
     }
 }

@@ -22,8 +22,9 @@ public class WordService implements BaseService<Word> {
     }
 
     @Override
-    public void save(Word data) {
+    public Word save(Word data) {
         epubNotKnownWordsService.markAsLearned(data.getName());
+        return data;
     }
 
     @Override
