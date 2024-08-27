@@ -54,6 +54,8 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
         field.setValue(item.getName());
 
         Button saveButton = new Button("Mark as learned.");
+        saveButton.addClassName("option-button");
+
         saveButton.addClickListener(e -> {
             data.remove(item);
             grid.getDataProvider().refreshAll();
