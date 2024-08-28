@@ -14,7 +14,6 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     public static final String ROUTE_NAME = "english-epub-words/not-learned-yet";
     protected HorizontalLayout dialogButtonsLayout;
     private final EpubPathLayout epubPathLayout;
-    protected Dialog dialog;
     public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout, BervanLogger log) {
         super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:", log);
         this.epubPathLayout = epubPathLayout;
