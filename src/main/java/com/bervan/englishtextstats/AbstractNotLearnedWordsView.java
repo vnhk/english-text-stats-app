@@ -1,6 +1,7 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.AbstractTableView;
+import com.bervan.core.model.BervanLogger;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -14,8 +15,8 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     protected HorizontalLayout dialogButtonsLayout;
     private final EpubPathLayout epubPathLayout;
     protected Dialog dialog;
-    public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout) {
-        super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:");
+    public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout, BervanLogger log) {
+        super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:", log);
         this.epubPathLayout = epubPathLayout;
         renderCommonComponents();
         add(epubPathLayout);

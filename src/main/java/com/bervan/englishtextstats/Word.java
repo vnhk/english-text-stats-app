@@ -3,8 +3,10 @@ package com.bervan.englishtextstats;
 import com.bervan.common.model.PersistableTableData;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Word implements PersistableTableData {
+    private final UUID uuid = UUID.randomUUID();
     private String name;
     private Long count;
     private String translation;
@@ -17,6 +19,11 @@ public class Word implements PersistableTableData {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public UUID getId() {
+        return uuid;
     }
 
     public void setName(String name) {
@@ -49,12 +56,11 @@ public class Word implements PersistableTableData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Word word)) return false;
-        return Objects.equals(name, word.name) && Objects.equals(count, word.count) && Objects.equals(translation, word.translation);
+        return Objects.equals(uuid, word.uuid) && Objects.equals(name, word.name) && Objects.equals(count, word.count) && Objects.equals(translation, word.translation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, count, translation);
+        return Objects.hash(uuid, name, count, translation);
     }
-
 }
