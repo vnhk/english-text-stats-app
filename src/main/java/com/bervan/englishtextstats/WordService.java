@@ -32,6 +32,11 @@ public class WordService implements BaseService<Word> {
         return epubNotKnownWordsService.getNotLearnedWords(100);
     }
 
+    @Override
+    public void delete(Word item) {
+        throw new RuntimeException("Not valid method!");
+    }
+
     public String getActualEpub() {
         return epubNotKnownWordsService.getActualEpub();
     }
