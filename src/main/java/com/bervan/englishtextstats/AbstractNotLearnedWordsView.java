@@ -15,7 +15,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     protected HorizontalLayout dialogButtonsLayout;
     private final EpubPathLayout epubPathLayout;
     public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout, BervanLogger log) {
-        super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:", log);
+        super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:", log, Word.class);
         this.epubPathLayout = epubPathLayout;
         renderCommonComponents();
         add(epubPathLayout);
