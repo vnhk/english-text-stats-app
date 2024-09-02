@@ -10,6 +10,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
+import java.util.Comparator;
+
 public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word> {
     public static final String ROUTE_NAME = "english-epub-words/not-learned-yet";
     protected HorizontalLayout dialogButtonsLayout;
@@ -34,12 +36,14 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     protected Grid<Word> getGrid() {
         Grid<Word> grid = new Grid<>(Word.class, false);
         grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(word.getName())))
-                .setHeader("Name").setKey("name").setResizable(true).setSortable(true);
+                .setHeader("Name").setKey("name").setResizable(true);
         grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(String.valueOf(word.getCount()))))
-                .setHeader("Count").setKey("count").setResizable(true);
+                .setHeader("Count").setKey("count").setResizable(true)
+                .setSortable(true).setComparator(Comparator.comparing(Word::getCount));
 
         grid.getElement().getStyle().set("--lumo-size-m", 100 + "px");
 
+        removeUnSortedState(grid, 1);
 
         return grid;
     }

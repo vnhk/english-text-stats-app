@@ -112,13 +112,8 @@ public class EpubNotKnownWordsService {
                     .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                     .toList();
 
-            // Translate words to Polish
-            Map<String, String> translations = new HashMap<>();
-
-            // Prepare and print results
             for (Map.Entry<String, Long> entry : sortedWordsComplete) {
-                String translation = translations.getOrDefault(entry.getKey(), "");
-                resultComplete.add(new Word(entry.getKey(), entry.getValue(), translation));
+                resultComplete.add(new Word(entry.getKey(), entry.getValue(), null));
             }
         } catch (Exception e) {
             logger.error("Could not extract english words.", e);
