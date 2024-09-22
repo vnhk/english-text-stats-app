@@ -35,7 +35,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
     @Override
     protected Grid<Word> getGrid() {
         Grid<Word> grid = new Grid<>(Word.class, false);
-        grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(word.getName())))
+        grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(word.getTableFilterableColumnValue())))
                 .setHeader("Name").setKey("name").setResizable(true);
         grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(String.valueOf(word.getCount()))))
                 .setHeader("Count").setKey("count").setResizable(true)
@@ -55,7 +55,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
         TextArea field = new TextArea(clickedColumn);
         field.setWidth("100%");
 
-        field.setValue(item.getName());
+        field.setValue(item.getTableFilterableColumnValue());
 
         Button saveButton = new Button("Mark as learned.");
         saveButton.addClassName("option-button");

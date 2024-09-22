@@ -17,7 +17,7 @@ public class Word implements PersistableTableData {
         this.translation = translation;
     }
 
-    public String getName() {
+    public String getTableFilterableColumnValue() {
         return name;
     }
 

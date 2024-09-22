@@ -17,13 +17,13 @@ public class WordService implements BaseService<Word> {
     @Override
     public void save(List<Word> data) {
         for (Word datum : data) {
-            epubNotKnownWordsService.markAsLearned(datum.getName());
+            epubNotKnownWordsService.markAsLearned(datum.getTableFilterableColumnValue());
         }
     }
 
     @Override
     public Word save(Word data) {
-        epubNotKnownWordsService.markAsLearned(data.getName());
+        epubNotKnownWordsService.markAsLearned(data.getTableFilterableColumnValue());
         return data;
     }
 
