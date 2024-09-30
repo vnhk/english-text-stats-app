@@ -8,28 +8,28 @@ import java.util.Set;
 
 @Service
 public class WordService implements BaseService<Word> {
-    private final EpubNotKnownWordsService epubNotKnownWordsService;
+    private final EbookNotKnownWordsService ebookNotKnownWordsService;
 
-    public WordService(EpubNotKnownWordsService epubNotKnownWords) {
-        this.epubNotKnownWordsService = epubNotKnownWords;
+    public WordService(EbookNotKnownWordsService epubNotKnownWords) {
+        this.ebookNotKnownWordsService = epubNotKnownWords;
     }
 
     @Override
     public void save(List<Word> data) {
         for (Word datum : data) {
-            epubNotKnownWordsService.markAsLearned(datum.getTableFilterableColumnValue());
+            ebookNotKnownWordsService.markAsLearned(datum.getTableFilterableColumnValue());
         }
     }
 
     @Override
     public Word save(Word data) {
-        epubNotKnownWordsService.markAsLearned(data.getTableFilterableColumnValue());
+        ebookNotKnownWordsService.markAsLearned(data.getTableFilterableColumnValue());
         return data;
     }
 
     @Override
     public Set<Word> load() {
-        return epubNotKnownWordsService.getNotLearnedWords(100);
+        return ebookNotKnownWordsService.getNotLearnedWords(100);
     }
 
     @Override
@@ -38,10 +38,10 @@ public class WordService implements BaseService<Word> {
     }
 
     public String getActualEpub() {
-        return epubNotKnownWordsService.getActualEpub();
+        return ebookNotKnownWordsService.getActualEbook();
     }
 
     public void setActualEpub(String actualEbook) {
-        epubNotKnownWordsService.setActualEpub(actualEbook);
+        ebookNotKnownWordsService.setActualEbook(actualEbook);
     }
 }

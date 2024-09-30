@@ -13,14 +13,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import java.util.Comparator;
 
 public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word> {
-    public static final String ROUTE_NAME = "english-epub-words/not-learned-yet";
+    public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
     protected HorizontalLayout dialogButtonsLayout;
-    private final EpubPathLayout epubPathLayout;
-    public AbstractNotLearnedWordsView(WordService service, EpubPathLayout epubPathLayout, BervanLogger log) {
+    private final EbookPathLayout ebookPathLayout;
+    public AbstractNotLearnedWordsView(WordService service, EbookPathLayout ebookPathLayout, BervanLogger log) {
         super(new EnglishTextLayout(ROUTE_NAME), service, "Not learned words:", log, Word.class);
-        this.epubPathLayout = epubPathLayout;
+        this.ebookPathLayout = ebookPathLayout;
         renderCommonComponents();
-        add(epubPathLayout);
+        add(ebookPathLayout);
         refreshData();
 
         contentLayout.remove(addButton);
@@ -28,7 +28,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word
 
     @Override
     protected void refreshData() {
-        epubPathLayout.refreshServiceActualEpub();
+        ebookPathLayout.refreshServiceActualEpub();
         super.refreshData();
     }
 

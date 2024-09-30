@@ -5,21 +5,20 @@ import com.bervan.common.model.BaseOneValue;
 import com.bervan.common.onevalue.OneValueService;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopeMetadata;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class EpubPathLayout extends AbstractOneValueView {
+public class EbookPathLayout extends AbstractOneValueView {
 
-    public static final String actualEpubPath = "actualEpubPath";
-    private final EpubNotKnownWordsService epubNotKnownWordsService;
+    public static final String actualEbookPath = "actualEbookPath";
+    private final EbookNotKnownWordsService ebookNotKnownWordsService;
 
-    public EpubPathLayout(OneValueService service, EpubNotKnownWordsService epubNotKnownWordsService) {
-        super(null, actualEpubPath, "Actual Epub", service);
-        this.epubNotKnownWordsService = epubNotKnownWordsService;
+    public EbookPathLayout(OneValueService service, EbookNotKnownWordsService ebookNotKnownWordsService) {
+        super(null, actualEbookPath, "Actual Ebook", service);
+        this.ebookNotKnownWordsService = ebookNotKnownWordsService;
     }
 
     @Override
@@ -31,17 +30,17 @@ public class EpubPathLayout extends AbstractOneValueView {
     protected void save(String value) {
         value = value.trim();
         super.save(value);
-        epubNotKnownWordsService.setActualEpub(value);
+        ebookNotKnownWordsService.setActualEbook(value);
     }
 
     @Override
     protected Optional<BaseOneValue> load(String key) {
         Optional<BaseOneValue> load = super.load(key);
-        load.ifPresent(baseOneValue -> epubNotKnownWordsService.setActualEpub(baseOneValue.getContent()));
+        load.ifPresent(baseOneValue -> ebookNotKnownWordsService.setActualEbook(baseOneValue.getContent()));
         return load;
     }
 
     public void refreshServiceActualEpub() {
-        load(actualEpubPath);
+        load(actualEbookPath);
     }
 }

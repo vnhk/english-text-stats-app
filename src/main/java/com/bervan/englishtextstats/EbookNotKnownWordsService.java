@@ -2,6 +2,8 @@ package com.bervan.englishtextstats;
 
 import com.bervan.common.service.FileBasedConfigUtils;
 import com.bervan.core.model.BervanLogger;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
-public class EpubNotKnownWordsService {
+public class EbookNotKnownWordsService {
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
 
@@ -26,7 +28,7 @@ public class EpubNotKnownWordsService {
     private final Set<String> inMemoryWords = new HashSet<>();
     private String actualEbook = null;
 
-    public EpubNotKnownWordsService(BervanLogger logger) {
+    public EbookNotKnownWordsService(BervanLogger logger) {
         this.logger = logger;
     }
 
@@ -89,7 +91,7 @@ public class EpubNotKnownWordsService {
         List<Word> resultComplete = new ArrayList<>();
 
         try {
-            String extractedText = getEpubText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
+            String extractedText = getEbookText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
 
             List<String> words = filterWords(
                     Arrays.stream(extractedText.toLowerCase().split("\\W+"))
@@ -143,19 +145,26 @@ public class EpubNotKnownWordsService {
     }
 
 
-    private String getEpubText(String filePath) {
+    private String getEbookText(String filePath) throws IOException {
         StringBuilder textContent = new StringBuilder();
 
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html")) {
-                    textContent.append(extractTextFromEntry(zipInputStream));
+        if (filePath.endsWith(".epub")) {
+            try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath))) {
+                ZipEntry entry;
+                while ((entry = zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html")) {
+                        textContent.append(extractTextFromEntry(zipInputStream));
+                    }
+                    zipInputStream.closeEntry();
                 }
-                zipInputStream.closeEntry();
+            } catch (IOException e) {
+                logger.error(e);
             }
-        } catch (IOException e) {
-            logger.error(e);
+        } else if (filePath.endsWith(".pdf")) {
+            PDDocument document = PDDocument.load(new File(filePath));
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            textContent.append(pdfStripper.getText(document));
+            document.close();
         }
 
         return textContent.toString();
@@ -203,11 +212,11 @@ public class EpubNotKnownWordsService {
         return filteredWords;
     }
 
-    public String getActualEpub() {
+    public String getActualEbook() {
         return actualEbook;
     }
 
-    public void setActualEpub(String actualEbook) {
+    public void setActualEbook(String actualEbook) {
         this.actualEbook = actualEbook;
     }
 }
