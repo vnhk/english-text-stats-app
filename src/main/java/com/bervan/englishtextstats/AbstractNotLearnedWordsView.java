@@ -11,8 +11,9 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import java.util.Comparator;
+import java.util.UUID;
 
-public abstract class AbstractNotLearnedWordsView extends AbstractTableView<Word> {
+public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID, Word> {
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
     protected HorizontalLayout dialogButtonsLayout;
     private final EbookPathLayout ebookPathLayout;

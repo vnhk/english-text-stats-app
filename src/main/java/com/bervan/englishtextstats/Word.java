@@ -1,15 +1,27 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.model.PersistableTableData;
+import com.bervan.common.user.User;
+import jakarta.persistence.ManyToOne;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class Word implements PersistableTableData {
+public class Word implements PersistableTableData<UUID> {
     private final UUID uuid = UUID.randomUUID();
     private String name;
     private Long count;
     private String translation;
+
+    @Override
+    public User getOwner() {
+        return null;
+    }
+
+    @Override
+    public void setOwner(User user) {
+
+    }
 
     public Word(String name, Long count, String translation) {
         this.name = name;
@@ -24,6 +36,11 @@ public class Word implements PersistableTableData {
     @Override
     public UUID getId() {
         return uuid;
+    }
+
+    @Override
+    public void setId(UUID uuid) {
+
     }
 
     public void setName(String name) {

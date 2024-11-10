@@ -1,13 +1,15 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.service.BaseService;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
-public class WordService implements BaseService<Word> {
+public class WordService implements BaseService<UUID, Word> {
     private final EbookNotKnownWordsService ebookNotKnownWordsService;
 
     public WordService(EbookNotKnownWordsService epubNotKnownWords) {
@@ -28,6 +30,7 @@ public class WordService implements BaseService<Word> {
     }
 
     @Override
+    @PostFilter("filterObject.owner != null && filterObject.owner.getId().equals(T(com.bervan.common.service.AuthService).getLoggedUserId())")
     public Set<Word> load() {
         return ebookNotKnownWordsService.getNotLearnedWords(100);
     }
