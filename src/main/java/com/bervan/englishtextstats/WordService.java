@@ -30,7 +30,7 @@ public class WordService implements BaseService<UUID, Word> {
     }
 
     @Override
-    @PostFilter("filterObject.owner != null && filterObject.owner.getId().equals(T(com.bervan.common.service.AuthService).getLoggedUserId())")
+    @PostFilter("(T(com.bervan.common.service.AuthService).hasAccess(filterObject.owners))")
     public Set<Word> load() {
         return ebookNotKnownWordsService.getNotLearnedWords(100);
     }
