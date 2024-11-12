@@ -28,8 +28,6 @@ public class EbookNotKnownWordsService {
     private final Set<String> inMemoryWords = new HashSet<>();
     private String actualEbook = null;
 
-    public static
-
     public EbookNotKnownWordsService(BervanLogger logger) {
         this.logger = logger;
     }
