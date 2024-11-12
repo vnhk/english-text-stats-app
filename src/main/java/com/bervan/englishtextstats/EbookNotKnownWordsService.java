@@ -28,6 +28,8 @@ public class EbookNotKnownWordsService {
     private final Set<String> inMemoryWords = new HashSet<>();
     private String actualEbook = null;
 
+    public static
+
     public EbookNotKnownWordsService(BervanLogger logger) {
         this.logger = logger;
     }
@@ -95,7 +97,7 @@ public class EbookNotKnownWordsService {
 
             List<String> words = filterWords(
                     Arrays.stream(extractedText.toLowerCase().split("\\W+"))
-                            .filter(word -> word.length() >= 3)
+                            .filter(word -> word.length() > 0)
                             .collect(Collectors.toList()),
                     inMemoryWords
             );
@@ -104,9 +106,8 @@ public class EbookNotKnownWordsService {
             Map<String, Long> wordCounterComplete = words.stream()
                     .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
 
-            // Get words that appear more than 3 times
             Map<String, Long> commonWordsComplete = wordCounterComplete.entrySet().stream()
-                    .filter(entry -> entry.getValue() > 3)
+                    .filter(entry -> entry.getValue() > 0)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // Sort words by frequency
