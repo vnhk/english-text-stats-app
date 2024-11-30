@@ -45,7 +45,7 @@ public class Word implements PersistableTableData<UUID> {
 
     @Override
     public boolean hasAccess(User user) {
-        return false;
+        return true;
     }
 
     @Override

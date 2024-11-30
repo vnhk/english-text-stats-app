@@ -11,6 +11,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -88,47 +90,48 @@ public class EbookNotKnownWordsService {
             loadIntoMemory();
         }
 
-        List<Word> resultComplete = new ArrayList<>();
-
         try {
             String extractedText = getEbookText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
 
-            List<String> words = filterWords(
-                    Arrays.stream(extractedText.toLowerCase().split("\\W+"))
-                            .filter(word -> word.length() > 0)
-                            .collect(Collectors.toList()),
-                    inMemoryWords
-            );
+            ConcurrentMap<String, Long> wordCounterComplete = Arrays.stream(extractedText.toLowerCase().split("\\W+"))
+                    .parallel()
+                    .filter(word -> word.length() > 0)
+                    .map(String::trim)
+                    .filter(word -> !isLearned(word, inMemoryWords))
+                    .collect(Collectors.groupingByConcurrent(Function.identity(), Collectors.counting()));
 
-            // Count word frequencies
-            Map<String, Long> wordCounterComplete = words.stream()
-                    .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-
-            Map<String, Long> commonWordsComplete = wordCounterComplete.entrySet().stream()
-                    .filter(entry -> entry.getValue() > 0)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            // Sort words by frequency
-            List<Map.Entry<String, Long>> sortedWordsComplete = commonWordsComplete.entrySet().stream()
-                    .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+            List<Map.Entry<String, Long>> sortedWordsComplete = wordCounterComplete.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .toList();
 
-            for (Map.Entry<String, Long> entry : sortedWordsComplete) {
-                resultComplete.add(new Word(entry.getKey(), entry.getValue(), null));
-            }
+            Set<Word> resultReduced = sortedWordsComplete.stream()
+                    .limit(howMany)
+                    .map(entry -> new Word(entry.getKey(), entry.getValue(), null))
+                    .collect(Collectors.toSet());
+
+            logger.debug("All Words Not Learned: " + sortedWordsComplete.size());
+
+            return resultReduced;
         } catch (Exception e) {
-            logger.error("Could not extract english words.", e);
-            throw new RuntimeException("Could not extract english words.");
+            logger.error("Could not extract English words.", e);
+            throw new RuntimeException("Could not extract English words.", e);
         }
+    }
 
-        Set<Word> resultReduced = new HashSet<>();
-
-        for (int i = 0; i < Math.min(howMany, resultComplete.size()); i++) {
-            resultReduced.add(resultComplete.get(i));
+    private boolean isLearned(String word, Set<String> learnedWords) {
+        word = word.trim();
+        if ((word.endsWith("s") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
+                (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
+                (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
+                (word.endsWith("ing") && learnedWords.contains(word.substring(0, word.length() - 3))) ||
+                (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
+                (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
+                (word.endsWith("ly") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
+                (word.endsWith("ies") && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) ||
+                word.equals("true")) {
+            return true;
         }
-        logger.debug("All Words Not Learned: " + resultComplete.size());
-
-        return resultReduced;
+        return learnedWords.contains(word);
     }
 
     private Set<String> loadWordsFromCSV(Path filePath) {
@@ -187,28 +190,6 @@ public class EbookNotKnownWordsService {
             }
         }
         return content.toString();
-    }
-
-    private List<String> filterWords(List<String> words, Set<String> learnedWords) {
-        List<String> filteredWords = new ArrayList<>();
-        for (String word : words) {
-            word = word.trim();
-            if ((word.endsWith("s") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                    (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                    (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                    (word.endsWith("ing") && learnedWords.contains(word.substring(0, word.length() - 3))) ||
-                    (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                    (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                    (word.endsWith("ly") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                    (word.endsWith("ies") && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) ||
-                    word.equals("true")) {
-                continue;
-            }
-            if (!learnedWords.contains(word)) {
-                filteredWords.add(word);
-            }
-        }
-        return filteredWords;
     }
 
     public String getActualEbook() {

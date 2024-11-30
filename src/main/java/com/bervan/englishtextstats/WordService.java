@@ -1,7 +1,6 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.service.BaseService;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class WordService implements BaseService<UUID, Word> {
     }
 
     @Override
-    @PostFilter("(T(com.bervan.common.service.AuthService).hasAccess(filterObject.owners))")
+//    @PostFilter("(T(com.bervan.common.service.AuthService).hasAccess(filterObject.owners))")
     public Set<Word> load() {
         return ebookNotKnownWordsService.getNotLearnedWords(100);
     }
