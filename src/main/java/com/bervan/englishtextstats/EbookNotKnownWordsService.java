@@ -95,6 +95,8 @@ public class EbookNotKnownWordsService {
         try {
             String extractedText = getEbookText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
 
+            logger.info("Extracted Ebook text length: " + extractedText.length());
+
             ConcurrentMap<String, Long> wordCounterComplete = Arrays.stream(extractedText.toLowerCase().split("\\W+"))
                     .parallel()
                     .filter(word -> word.length() > 0)
