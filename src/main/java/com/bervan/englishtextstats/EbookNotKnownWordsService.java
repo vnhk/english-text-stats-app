@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class EbookNotKnownWordsService {
 
     private final BervanLogger logger;
 
-    private final Set<String> inMemoryWords = new HashSet<>();
+    private final Set<String> inMemoryWords = ConcurrentHashMap.newKeySet();
     private String actualEbook = null;
 
     public EbookNotKnownWordsService(BervanLogger logger) {
@@ -43,6 +44,7 @@ public class EbookNotKnownWordsService {
                         knownWords.addAll(loadWordsFromCSV(f.toPath()));
                     });
             inMemoryWords.addAll(knownWords);
+            logger.info("Loaded " + inMemoryWords.size() + " known words into memory.");
         } catch (Exception e) {
             logger.error("Could not load learned words.", e);
         }
@@ -109,7 +111,7 @@ public class EbookNotKnownWordsService {
                     .map(entry -> new Word(entry.getKey(), entry.getValue(), null))
                     .collect(Collectors.toSet());
 
-            logger.debug("All Words Not Learned: " + sortedWordsComplete.size());
+            logger.info("All Words Not Learned: " + sortedWordsComplete.size());
 
             return resultReduced;
         } catch (Exception e) {
@@ -120,15 +122,28 @@ public class EbookNotKnownWordsService {
 
     private boolean isLearned(String word, Set<String> learnedWords) {
         word = word.trim();
-        if ((word.endsWith("s") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 1))) ||
-                (word.endsWith("ing") && learnedWords.contains(word.substring(0, word.length() - 3))) ||
-                (word.endsWith("er") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                (word.endsWith("ed") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                (word.endsWith("ly") && learnedWords.contains(word.substring(0, word.length() - 2))) ||
-                (word.endsWith("ies") && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) ||
-                word.equals("true")) {
+        if (word.equals("true")) {
+            return true;
+        }
+        if (word.endsWith("s") && learnedWords.contains(word.substring(0, word.length() - 1))) {
+            return true;
+        }
+        if (word.endsWith("ed")) {
+            String baseWord = word.substring(0, word.length() - 2);
+            if (learnedWords.contains(baseWord) || learnedWords.contains(baseWord + "e")) {
+                return true;
+            }
+        }
+        if (word.endsWith("ing")) {
+            String baseWord = word.substring(0, word.length() - 3);
+            if (learnedWords.contains(baseWord) || learnedWords.contains(baseWord + "e")) {
+                return true;
+            }
+        }
+        if (word.endsWith("ly") && learnedWords.contains(word.substring(0, word.length() - 2))) {
+            return true;
+        }
+        if (word.endsWith("ies") && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) {
             return true;
         }
         return learnedWords.contains(word);
