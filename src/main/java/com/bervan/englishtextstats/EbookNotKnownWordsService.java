@@ -93,7 +93,7 @@ public class EbookNotKnownWordsService {
         }
 
         try {
-            String extractedText = getEbookText(pathToFileStorage + File.separator + appConfigFolder + File.separator + actualEbook);
+            String extractedText = getEbookText(pathToFileStorage + appConfigFolder + File.separator + actualEbook);
 
             logger.info("Extracted Ebook text length: " + extractedText.length());
 
