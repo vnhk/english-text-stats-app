@@ -165,12 +165,14 @@ public class EbookNotKnownWordsService {
 
 
     private String getEbookText(String filePath) throws IOException {
+        logger.info("Loading file: " + filePath);
         StringBuilder textContent = new StringBuilder();
 
         if (filePath.endsWith(".epub")) {
             try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath))) {
                 ZipEntry entry;
                 while ((entry = zipInputStream.getNextEntry()) != null) {
+                    logger.info("Entry name in epub: " + entry.getName());
                     if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html")) {
                         textContent.append(extractTextFromEntry(zipInputStream));
                     }
@@ -184,6 +186,8 @@ public class EbookNotKnownWordsService {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             textContent.append(pdfStripper.getText(document));
             document.close();
+        } else {
+            throw new RuntimeException("File extension is unsupported!");
         }
 
         return textContent.toString();
