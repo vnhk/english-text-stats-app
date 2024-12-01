@@ -173,7 +173,7 @@ public class EbookNotKnownWordsService {
                 ZipEntry entry;
                 while ((entry = zipInputStream.getNextEntry()) != null) {
                     logger.info("Entry name in epub: " + entry.getName());
-                    if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html")) {
+                    if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html") || entry.getName().endsWith(".htm")) {
                         textContent.append(extractTextFromEntry(zipInputStream));
                     }
                     zipInputStream.closeEntry();
