@@ -29,6 +29,7 @@ public class EbookNotKnownWordsService {
     private final BervanLogger logger;
 
     private final Set<String> inMemoryWords = ConcurrentHashMap.newKeySet();
+    private String extractedText = null;
     private String actualEbook = null;
 
     public EbookNotKnownWordsService(BervanLogger logger) {
@@ -92,8 +93,16 @@ public class EbookNotKnownWordsService {
             loadIntoMemory();
         }
 
+        if (extractedText == null) {
+            try {
+                extractedText = getEbookText(pathToFileStorage + appConfigFolder + File.separator + actualEbook);
+            } catch (Exception e) {
+                logger.error("Could not extract English words.", e);
+                throw new RuntimeException("Could not extract English words.", e);
+            }
+        }
+
         try {
-            String extractedText = getEbookText(pathToFileStorage + appConfigFolder + File.separator + actualEbook);
 
             logger.info("Extracted Ebook text length: " + extractedText.length());
 
@@ -123,6 +132,12 @@ public class EbookNotKnownWordsService {
     }
 
     private boolean isLearned(String word, Set<String> learnedWords) {
+        try {
+            Double.parseDouble(word);
+            return true;
+        } catch (NumberFormatException ignored) {
+        }
+
         word = word.trim();
         if (word.equals("true")) {
             return true;
@@ -219,5 +234,6 @@ public class EbookNotKnownWordsService {
 
     public void setActualEbook(String actualEbook) {
         this.actualEbook = actualEbook;
+        extractedText = null;
     }
 }
