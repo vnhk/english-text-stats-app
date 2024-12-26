@@ -1,6 +1,7 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.service.BaseService;
+import com.bervan.ieentities.ExcelIEEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +38,11 @@ public class WordService implements BaseService<UUID, Word> {
     @Override
     public void delete(Word item) {
         throw new RuntimeException("Not valid method!");
+    }
+
+    @Override
+    public void saveIfValid(List<? extends ExcelIEEntity> objects) {
+        throw new RuntimeException("Not supported yet!");
     }
 
     public String getActualEpub() {
