@@ -9,10 +9,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class WordService implements BaseService<UUID, Word> {
+public class WordService extends BaseService<UUID, Word> {
     private final EbookNotKnownWordsService ebookNotKnownWordsService;
 
     public WordService(EbookNotKnownWordsService epubNotKnownWords) {
+        super(null, null);
         this.ebookNotKnownWordsService = epubNotKnownWords;
     }
 
@@ -41,8 +42,8 @@ public class WordService implements BaseService<UUID, Word> {
     }
 
     @Override
-    public void saveIfValid(List<? extends ExcelIEEntity> objects) {
-        throw new RuntimeException("Not supported yet!");
+    public void saveIfValid(List<? extends ExcelIEEntity<UUID>> objects) {
+        throw new RuntimeException("Not supported!");
     }
 
     public String getActualEpub() {
