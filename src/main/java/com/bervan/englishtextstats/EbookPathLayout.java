@@ -9,16 +9,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class EbookPathLayout extends AbstractOneValueView {
 
     public static final String actualEbookPath = "actualEbookPath";
-    private final EbookNotKnownWordsService ebookNotKnownWordsService;
+    private final WordService wordService;
 
-    public EbookPathLayout(OneValueService service, EbookNotKnownWordsService ebookNotKnownWordsService) {
+    public EbookPathLayout(OneValueService service, WordService wordService) {
         super(null, actualEbookPath, "Actual Ebook", service);
-        this.ebookNotKnownWordsService = ebookNotKnownWordsService;
+        this.wordService = wordService;
     }
 
     @Override
@@ -30,13 +28,13 @@ public class EbookPathLayout extends AbstractOneValueView {
     protected void save(String value) {
         value = value.trim();
         super.save(value);
-        ebookNotKnownWordsService.setActualEbook(value);
+        wordService.setActualEbookAndUpdatePath(value);
     }
 
     @Override
     protected Optional<BaseOneValue> load(String key) {
         Optional<BaseOneValue> load = super.load(key);
-        load.ifPresent(baseOneValue -> ebookNotKnownWordsService.setActualEbook(baseOneValue.getContent()));
+        load.ifPresent(baseOneValue -> wordService.setActualEbookAndUpdatePath(baseOneValue.getContent()));
         return load;
     }
 

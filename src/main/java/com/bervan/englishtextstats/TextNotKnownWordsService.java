@@ -4,8 +4,6 @@ import com.bervan.common.service.FileBasedConfigUtils;
 import com.bervan.core.model.BervanLogger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -18,21 +16,21 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-@Service
-public class EbookNotKnownWordsService {
-    @Value("${file.service.storage.folder}")
-    private String pathToFileStorage;
-
-    @Value("${ebook-not-known-words.file-storage-relative-path}")
-    private String appConfigFolder;
-
+public class TextNotKnownWordsService {
+    private final String pathToFileStorage;
+    private final String appConfigFolder;
     private final BervanLogger logger;
-
+    private final String pathToConfigFolder;
     private final Set<String> inMemoryWords = ConcurrentHashMap.newKeySet();
     private String extractedText = null;
     private String actualEbook = null;
+    private String filePath;
 
-    public EbookNotKnownWordsService(BervanLogger logger) {
+    public TextNotKnownWordsService(String pathToFileStorage, String appConfigFolder, BervanLogger logger) {
+        this.pathToFileStorage = pathToFileStorage;
+        this.appConfigFolder = appConfigFolder;
+        pathToConfigFolder = pathToFileStorage + appConfigFolder + File.separator;
+
         this.logger = logger;
     }
 
@@ -85,7 +83,7 @@ public class EbookNotKnownWordsService {
     }
 
     public Set<Word> getNotLearnedWords(int howMany) {
-        if (actualEbook == null) {
+        if (filePath == null) {
             return new HashSet<>();
         }
 
@@ -95,7 +93,7 @@ public class EbookNotKnownWordsService {
 
         if (extractedText == null) {
             try {
-                extractedText = getEbookText(pathToFileStorage + appConfigFolder + File.separator + actualEbook);
+                extractedText = getEbookText(filePath);
             } catch (Exception e) {
                 logger.error("Could not extract English words.", e);
                 throw new RuntimeException("Could not extract English words.", e);
@@ -197,14 +195,37 @@ public class EbookNotKnownWordsService {
                 logger.error(e);
             }
         } else if (filePath.endsWith(".pdf")) {
-            PDDocument document = PDDocument.load(new File(filePath));
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-            textContent.append(pdfStripper.getText(document));
-            document.close();
+            try (PDDocument document = PDDocument.load(new File(filePath))) {
+                PDFTextStripper pdfStripper = new PDFTextStripper();
+                textContent.append(pdfStripper.getText(document));
+            } catch (IOException e) {
+                logger.error(e);
+            }
+        } else if (filePath.endsWith(".vtt")) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.matches("\\d{2}:\\d{2}:\\d{2}\\.\\d{3} --> \\d{2}:\\d{2}:\\d{2}\\.\\d{3}")) {
+                        textContent.append(line).append(System.lineSeparator());
+                    }
+                }
+            } catch (IOException e) {
+                logger.error(e);
+            }
+        } else if (filePath.endsWith(".srt")) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.matches("\\d+") && !line.matches("\\d{2}:\\d{2}:\\d{2},\\d{3} --> \\d{2}:\\d{2}:\\d{2},\\d{3}")) {
+                        textContent.append(line).append(System.lineSeparator());
+                    }
+                }
+            } catch (IOException e) {
+                logger.error(e);
+            }
         } else {
             throw new RuntimeException("File extension is unsupported!");
         }
-
         return textContent.toString();
     }
 
@@ -232,8 +253,16 @@ public class EbookNotKnownWordsService {
         return actualEbook;
     }
 
-    public void setActualEbook(String actualEbook) {
+    public void setActualEbookAndUpdatePath(String actualEbook) {
         this.actualEbook = actualEbook;
         extractedText = null;
+        filePath = pathToConfigFolder + actualEbook;
+    }
+
+    public void buildPath(String path) {
+        if (!path.startsWith(File.separator)) {
+            path = File.separator + path;
+        }
+        filePath = pathToFileStorage + path;
     }
 }
