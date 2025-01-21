@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,9 +57,13 @@ public class WordService extends BaseService<UUID, Word> {
         return data;
     }
 
-    @Override
-    public Set<Word> load() {
+    public Set<Word> load(Pageable pageable) {
         return textNotKnownWordsService.getNotLearnedWords(100);
+    }
+
+    @Override
+    public long loadCount() {
+        return load(Pageable.unpaged()).size();
     }
 
     @Override

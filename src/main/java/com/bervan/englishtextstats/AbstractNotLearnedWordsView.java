@@ -62,9 +62,8 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
         saveButton.addClassName("option-button");
 
         saveButton.addClickListener(e -> {
-            data.remove(item);
-            grid.getDataProvider().refreshAll();
             service.save(item);
+            refreshDataAfterUpdate();
             dialog.close();
         });
 
