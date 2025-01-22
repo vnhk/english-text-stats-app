@@ -1,6 +1,7 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.AbstractTableView;
+import com.bervan.common.search.SearchRequest;
 import com.bervan.core.model.BervanLogger;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import java.util.Comparator;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID, Word> {
@@ -71,6 +73,11 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
         dialogButtonsLayout.add(saveButton);
 
         dialogLayout.add(headerLayout, field, dialogButtonsLayout);
+    }
+
+    @Override
+    protected long countAll(SearchRequest request, Set<Word> collect) {
+        return collect.size();
     }
 
     @Override

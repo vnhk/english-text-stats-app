@@ -1,5 +1,6 @@
 package com.bervan.englishtextstats;
 
+import com.bervan.common.search.SearchRequest;
 import com.bervan.common.service.BaseService;
 import com.bervan.core.model.BervanLogger;
 import com.bervan.ieentities.ExcelIEEntity;
@@ -57,8 +58,19 @@ public class WordService extends BaseService<UUID, Word> {
         return data;
     }
 
+    @Override
+    public Set<Word> load(SearchRequest request, Pageable pageable) {
+        return load(pageable);
+    }
+
+    @Override
     public Set<Word> load(Pageable pageable) {
         return textNotKnownWordsService.getNotLearnedWords(100);
+    }
+
+    @Override
+    public long loadCount(SearchRequest request) {
+        return loadCount();
     }
 
     @Override
