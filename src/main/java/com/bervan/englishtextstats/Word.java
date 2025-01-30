@@ -24,7 +24,7 @@ public class Word implements PersistableTableData<UUID> {
     }
 
     @Override
-    public Boolean getDeleted() {
+    public Boolean isDeleted() {
         return false;
     }
 
