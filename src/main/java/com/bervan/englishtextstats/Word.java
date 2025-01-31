@@ -59,6 +59,11 @@ public class Word implements PersistableTableData<UUID> {
     }
 
     @Override
+    public void setDeleted(Boolean value) {
+
+    }
+
+    @Override
     public void setId(UUID uuid) {
 
     }
