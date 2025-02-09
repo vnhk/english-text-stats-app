@@ -1,6 +1,7 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.search.SearchRequest;
+import com.bervan.common.search.model.SortDirection;
 import com.bervan.common.service.BaseService;
 import com.bervan.core.model.BervanLogger;
 import com.bervan.ieentities.ExcelIEEntity;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,8 +60,8 @@ public class WordService extends BaseService<UUID, Word> {
     }
 
     @Override
-    public Set<Word> load(SearchRequest request, Pageable pageable) {
-        return load(pageable);
+    public List<Word> load(SearchRequest request, Pageable pageable, String sort, SortDirection direction) {
+        return load(pageable).stream().toList();
     }
 
     @Override
