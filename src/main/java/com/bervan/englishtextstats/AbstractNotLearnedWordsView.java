@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.UUID;
@@ -76,7 +77,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
     }
 
     @Override
-    protected long countAll(SearchRequest request, Set<Word> collect) {
+    protected long countAll(SearchRequest request, Collection<Word> collect) {
         return collect.size();
     }
 
