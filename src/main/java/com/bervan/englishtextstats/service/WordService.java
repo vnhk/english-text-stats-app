@@ -1,14 +1,11 @@
-package com.bervan.englishtextstats;
+package com.bervan.englishtextstats.service;
 
 import com.bervan.common.search.SearchRequest;
 import com.bervan.common.search.model.SortDirection;
 import com.bervan.common.service.BaseService;
 import com.bervan.core.model.BervanLogger;
+import com.bervan.englishtextstats.Word;
 import com.bervan.ieentities.ExcelIEEntity;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -17,33 +14,14 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class WordService extends BaseService<UUID, Word> {
     private TextNotKnownWordsService textNotKnownWordsService;
-    @Value("${file.service.storage.folder}")
-    private String pathToFileStorage;
-
-    @Value("${ebook-not-known-words.file-storage-relative-path}")
-    private String appConfigFolder;
-
     private final BervanLogger log;
 
-    public WordService(BervanLogger log) {
+    public WordService(TextNotKnownWordsService textNotKnownWordsService, BervanLogger log) {
         super(null, null);
+        this.textNotKnownWordsService = textNotKnownWordsService;
         this.log = log;
-    }
-
-    @PostConstruct
-    private void init() {
-        this.textNotKnownWordsService = new TextNotKnownWordsService(pathToFileStorage, appConfigFolder, log);
-    }
-
-    public void setPath(String path) {
-        textNotKnownWordsService.buildPath(path);
-    }
-
-    public void setActualEbookAndUpdatePath(String actualEbook) {
-        textNotKnownWordsService.setActualEbookAndUpdatePath(actualEbook);
     }
 
     @Override
@@ -59,24 +37,28 @@ public class WordService extends BaseService<UUID, Word> {
         return data;
     }
 
+    public List<Word> loadNotKnownWords(UUID ebookId) {
+        return textNotKnownWordsService.getNotLearnedWords(50, ebookId);
+    }
+
     @Override
     public List<Word> load(SearchRequest request, Pageable pageable, String sort, SortDirection direction) {
-        return load(pageable).stream().toList();
+        throw new RuntimeException("Unsupported!");
     }
 
     @Override
     public Set<Word> load(Pageable pageable) {
-        return textNotKnownWordsService.getNotLearnedWords(100);
+        throw new RuntimeException("Unsupported!");
     }
 
     @Override
     public long loadCount(SearchRequest request) {
-        return loadCount();
+        throw new RuntimeException("Unsupported!");
     }
 
     @Override
     public long loadCount() {
-        return load(Pageable.unpaged()).size();
+        throw new RuntimeException("Unsupported!");
     }
 
     @Override
@@ -89,7 +71,7 @@ public class WordService extends BaseService<UUID, Word> {
         throw new RuntimeException("Not supported!");
     }
 
-    public String getActualEbook() {
-        return textNotKnownWordsService.getActualEbook();
+    public List<Word> loadNotKnownWords(String englishSubtitlesPath) {
+        return textNotKnownWordsService.getNotLearnedWords(50, englishSubtitlesPath);
     }
 }
