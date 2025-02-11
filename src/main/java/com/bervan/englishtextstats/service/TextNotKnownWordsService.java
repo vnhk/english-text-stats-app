@@ -26,9 +26,11 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
 
-    public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository, KnownWordRepository knownWordRepository, SearchService searchService, BervanLogger logger) {
+    public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository, KnownWordRepository knownWordRepository,
+                                    SearchService searchService, BervanLogger logger, @Value("${file.service.storage.folder}") String pathToFileStorage) {
         super(knownWordRepository, searchService);
         this.logger = logger;
+        this.pathToFileStorage = pathToFileStorage;
         this.extractedEbookTextRepository = extractedEbookTextRepository;
     }
 
@@ -54,11 +56,10 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
                 .anyMatch(e -> e.getValue().equals(word));
     }
 
-    private void updateInMemoryWords(Collection<KnownWord> toBeAdded) {
+    protected void updateInMemoryWords(Collection<KnownWord> toBeAdded) {
         inMemoryWordsForUser.computeIfAbsent(AuthService.getLoggedUserId(), k -> new ArrayList<>());
         inMemoryWordsForUser.get(AuthService.getLoggedUserId()).addAll(toBeAdded);
     }
-
 
     public List<Word> getNotLearnedWords(int howMany, String englishSubtitlesPath) {
         if (inMemoryWordsForUser.get(AuthService.getLoggedUserId()) == null) {
@@ -88,7 +89,8 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
                     .parallel()
                     .filter(word -> word.length() > 0)
                     .map(String::trim)
-                    .filter(word -> !isLearned(word, inMemoryWordsForUser.get(loggedUserId).stream().map(KnownWord::getValue).collect(Collectors.toList())))
+                    .filter(word -> !isLearned(word, inMemoryWordsForUser.get(loggedUserId).stream().map(KnownWord::getValue)
+                            .collect(Collectors.toList())))
                     .collect(Collectors.groupingByConcurrent(Function.identity(), Collectors.counting()));
 
             List<Map.Entry<String, Long>> sortedWordsComplete = wordCounterComplete.entrySet().stream()
@@ -109,7 +111,7 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
         }
     }
 
-    private void loadIntoMemory() {
+    public void loadIntoMemory() {
         updateInMemoryWords(load(Pageable.ofSize(100000000)));
     }
 
