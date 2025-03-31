@@ -133,6 +133,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
 
     @Override
     protected Grid<Word> getGrid() {
+        super.checkboxesColumnsEnabled = false;
         Grid<Word> grid = new Grid<>(Word.class, false);
         grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(word.getTableFilterableColumnValue())))
                 .setHeader("Name").setKey("name").setResizable(true);
