@@ -53,10 +53,11 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
             loadIntoMemory();
         }
         return inMemoryWordsForUser.get(AuthService.getLoggedUserId()).stream()
-                .anyMatch(e -> e.getValue().equals(word));
+                .anyMatch(e -> e.getValue().equalsIgnoreCase(word));
     }
 
     protected void updateInMemoryWords(Collection<KnownWord> toBeAdded) {
+        toBeAdded.forEach(e -> e.setValue(e.getValue().toLowerCase()));
         inMemoryWordsForUser.computeIfAbsent(AuthService.getLoggedUserId(), k -> new ArrayList<>());
         inMemoryWordsForUser.get(AuthService.getLoggedUserId()).addAll(toBeAdded);
     }
@@ -120,9 +121,9 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
             Double.parseDouble(word);
             return true;
         } catch (NumberFormatException ignored) {
-        }
+        } //filter numbers out
 
-        word = word.trim();
+        word = word.trim().toLowerCase();
         if (word.equals("true")) {
             return true;
         }
