@@ -2,12 +2,13 @@ package com.bervan.englishtextstats;
 
 import com.bervan.common.model.PersistableTableData;
 import com.bervan.common.user.User;
+import com.bervan.languageapp.service.FlashcardDetails;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class Word implements PersistableTableData<UUID> {
+public class Word implements PersistableTableData<UUID>, FlashcardDetails {
     private final UUID uuid = UUID.randomUUID();
     private String name;
     private Long count;
@@ -104,5 +105,10 @@ public class Word implements PersistableTableData<UUID> {
     @Override
     public int hashCode() {
         return Objects.hash(name, count, translation);
+    }
+
+    @Override
+    public String getValue() {
+        return name;
     }
 }

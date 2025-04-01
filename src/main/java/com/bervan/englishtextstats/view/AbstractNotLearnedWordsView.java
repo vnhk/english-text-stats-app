@@ -1,6 +1,5 @@
 package com.bervan.englishtextstats.view;
 
-import com.bervan.common.AbstractTableView;
 import com.bervan.common.search.SearchRequest;
 import com.bervan.common.service.AuthService;
 import com.bervan.core.model.BervanLogger;
@@ -9,17 +8,13 @@ import com.bervan.englishtextstats.Word;
 import com.bervan.englishtextstats.service.ExtractedEbookTextRepository;
 import com.bervan.englishtextstats.service.TextNotKnownWordsService;
 import com.bervan.englishtextstats.service.WordService;
-import com.vaadin.flow.component.button.Button;
+import com.bervan.languageapp.service.AddAsFlashcardService;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
@@ -30,19 +25,19 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID, Word> {
+public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWordsBaseView {
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
-    protected HorizontalLayout dialogButtonsLayout;
-    protected TextNotKnownWordsService textNotKnownWordsService;
-    protected ExtractedEbookTextRepository extractedEbookTextRepository;
     protected UUID selectedEbookId;
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
     @Value("${global-tmp-dir.file-storage-relative-path}")
     private String globalTmpDir;
+    protected final ExtractedEbookTextRepository extractedEbookTextRepository;
+    protected final TextNotKnownWordsService textNotKnownWordsService;
 
-    public AbstractNotLearnedWordsView(WordService service, ExtractedEbookTextRepository extractedEbookTextRepository, TextNotKnownWordsService textNotKnownWordsService, BervanLogger log) {
-        super(new EnglishTextLayout(ROUTE_NAME), service, log, Word.class);
+    public AbstractNotLearnedWordsView(WordService service, ExtractedEbookTextRepository extractedEbookTextRepository, TextNotKnownWordsService textNotKnownWordsService,
+                                       BervanLogger log, AddAsFlashcardService addAsFlashcardService) {
+        super(service, log, new EnglishTextLayout(ROUTE_NAME), addAsFlashcardService);
         this.extractedEbookTextRepository = extractedEbookTextRepository;
         this.textNotKnownWordsService = textNotKnownWordsService;
         renderCommonComponents();
@@ -132,47 +127,6 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
     }
 
     @Override
-    protected Grid<Word> getGrid() {
-        super.checkboxesColumnsEnabled = false;
-        Grid<Word> grid = new Grid<>(Word.class, false);
-        grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(word.getTableFilterableColumnValue())))
-                .setHeader("Name").setKey("name").setResizable(true);
-        grid.addColumn(new ComponentRenderer<>(word -> formatTextComponent(String.valueOf(word.getCount()))))
-                .setHeader("Count").setKey("count").setResizable(true)
-                .setSortable(true).setComparator(Comparator.comparing(Word::getCount));
-
-        grid.getElement().getStyle().set("--lumo-size-m", 100 + "px");
-
-        removeUnSortedState(grid, 1);
-
-        return grid;
-    }
-
-    @Override
-    protected void buildOnColumnClickDialogContent(Dialog dialog, VerticalLayout dialogLayout, HorizontalLayout headerLayout, String clickedColumn, Word item) {
-        dialogButtonsLayout = new HorizontalLayout();
-
-        TextArea field = new TextArea(clickedColumn);
-        field.setWidth("100%");
-
-        field.setValue(item.getTableFilterableColumnValue());
-
-        Button saveButton = new Button("Mark as learned.");
-        saveButton.addClassName("option-button");
-
-        saveButton.addClickListener(e -> {
-            data.remove(item);
-            grid.getDataProvider().refreshAll();
-            service.save(item);
-            dialog.close();
-        });
-
-        dialogButtonsLayout.add(saveButton);
-
-        dialogLayout.add(headerLayout, field, dialogButtonsLayout);
-    }
-
-    @Override
     protected List<Word> loadData() {
         if (selectedEbookId != null) {
             return ((WordService) service).loadNotKnownWords(selectedEbookId);
@@ -183,15 +137,5 @@ public abstract class AbstractNotLearnedWordsView extends AbstractTableView<UUID
     @Override
     protected long countAll(SearchRequest request, Collection<Word> collect) {
         return collect.size();
-    }
-
-    @Override
-    protected void newItemButtonClick() {
-        throw new RuntimeException("Open dialog is invalid");
-    }
-
-    @Override
-    protected void buildNewItemDialogContent(Dialog dialog, VerticalLayout dialogLayout, HorizontalLayout headerLayout) {
-        throw new RuntimeException("Open dialog is invalid");
     }
 }
