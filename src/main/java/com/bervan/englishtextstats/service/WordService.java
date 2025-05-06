@@ -42,7 +42,7 @@ public class WordService extends BaseService<UUID, Word> {
     }
 
     @Override
-    public List<Word> load(SearchRequest request, Pageable pageable, String sort, SortDirection direction) {
+    public List<Word> load(SearchRequest request, Pageable pageable, String sort, SortDirection direction, List<String> columnsToFetch) {
         throw new RuntimeException("Unsupported!");
     }
 
