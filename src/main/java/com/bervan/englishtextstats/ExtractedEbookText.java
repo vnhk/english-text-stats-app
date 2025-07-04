@@ -2,7 +2,7 @@ package com.bervan.englishtextstats;
 
 import com.bervan.common.model.BervanBaseEntity;
 import com.bervan.common.model.PersistableTableData;
-import com.bervan.common.model.VaadinTableColumn;
+import com.bervan.common.model.VaadinBervanColumn;
 import com.bervan.ieentities.ExcelIEEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ public class ExtractedEbookText extends BervanBaseEntity<UUID>
     @Id
     private UUID id;
     @NotNull
-    @VaadinTableColumn(internalName = "ebookName", displayName = "Ebook Name")
+    @VaadinBervanColumn(internalName = "ebookName", displayName = "Ebook Name")
     private String ebookName;
     @Lob
     @Size(max = 500000000)

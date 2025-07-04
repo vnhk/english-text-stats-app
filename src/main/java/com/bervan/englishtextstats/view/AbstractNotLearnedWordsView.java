@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
@@ -25,15 +26,16 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWordsBaseView {
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
+    protected final ExtractedEbookTextRepository extractedEbookTextRepository;
+    protected final TextNotKnownWordsService textNotKnownWordsService;
     protected UUID selectedEbookId;
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
     @Value("${global-tmp-dir.file-storage-relative-path}")
     private String globalTmpDir;
-    protected final ExtractedEbookTextRepository extractedEbookTextRepository;
-    protected final TextNotKnownWordsService textNotKnownWordsService;
 
     public AbstractNotLearnedWordsView(WordService service, ExtractedEbookTextRepository extractedEbookTextRepository, TextNotKnownWordsService textNotKnownWordsService,
                                        BervanLogger log, AddAsFlashcardService addAsFlashcardService) {
@@ -97,7 +99,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
             }
 
         } catch (Exception e) {
-            log.error(e);
+            log.error("Exception!", e);
         } finally {
             if (file != null) {
                 file.delete();
