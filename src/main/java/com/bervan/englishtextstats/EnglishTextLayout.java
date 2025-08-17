@@ -9,8 +9,8 @@ public class EnglishTextLayout extends MenuNavigationComponent {
     public EnglishTextLayout(String routeName) {
         super(routeName);
 
-        addButtonIfVisible(menuButtonsRow, AbstractNotLearnedWordsView.ROUTE_NAME, "Not Learned Words", VaadinIcon.HOME.create());
-        addButtonIfVisible(menuButtonsRow, AbstractEbooksView.ROUTE_NAME, "Ebooks", VaadinIcon.HOME.create());
+        addButtonIfVisible(menuButtonsRow, AbstractNotLearnedWordsView.ROUTE_NAME, "Not Learned Words", VaadinIcon.BOOK.create());
+        addButtonIfVisible(menuButtonsRow, AbstractEbooksView.ROUTE_NAME, "Ebooks", VaadinIcon.BOOKMARK.create());
 
         add(menuButtonsRow);
     }
