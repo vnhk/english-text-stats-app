@@ -1,6 +1,6 @@
 package com.bervan.englishtextstats.view;
 
-import com.bervan.common.AbstractBervanTableView;
+import com.bervan.common.view.AbstractBervanTableView;
 import com.bervan.core.model.BervanLogger;
 import com.bervan.englishtextstats.EnglishTextLayout;
 import com.bervan.englishtextstats.ExtractedEbookText;
