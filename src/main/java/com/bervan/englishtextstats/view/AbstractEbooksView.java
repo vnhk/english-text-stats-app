@@ -6,6 +6,7 @@ import com.bervan.englishtextstats.EnglishTextLayout;
 import com.bervan.englishtextstats.ExtractedEbookText;
 import com.bervan.englishtextstats.service.ExtractedEbookTextService;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public abstract class AbstractEbooksView extends AbstractBervanTableView<UUID, ExtractedEbookText> {
