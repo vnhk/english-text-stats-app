@@ -39,7 +39,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
 
     public AbstractNotLearnedWordsView(WordService service, ExtractedEbookTextRepository extractedEbookTextRepository, TextNotKnownWordsService textNotKnownWordsService,
                                        BervanLogger log, AddAsFlashcardService addAsFlashcardService) {
-        super(service, log, new EnglishTextLayout(ROUTE_NAME), addAsFlashcardService);
+        super(service, log, new EnglishTextLayout(ROUTE_NAME), addAsFlashcardService, "EN");
         this.extractedEbookTextRepository = extractedEbookTextRepository;
         this.textNotKnownWordsService = textNotKnownWordsService;
         renderCommonComponents();
