@@ -2,7 +2,7 @@ package com.bervan.englishtextstats;
 
 import com.bervan.common.model.BervanBaseEntity;
 import com.bervan.common.model.PersistableTableData;
-import com.bervan.common.model.VaadinBervanColumn;
+
 import com.bervan.ieentities.ExcelIEEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -20,7 +20,6 @@ public class KnownWord extends BervanBaseEntity<UUID>
     @Id
     private UUID id;
     @Size(max = 100)
-    @VaadinBervanColumn(internalName = "value", displayName = "Value")
     private String value;
     private LocalDateTime modificationDate;
     private LocalDateTime creationDate;

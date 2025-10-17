@@ -2,7 +2,6 @@ package com.bervan.englishtextstats;
 
 import com.bervan.common.model.BervanBaseEntity;
 import com.bervan.common.model.PersistableTableData;
-import com.bervan.common.model.VaadinBervanColumn;
 import com.bervan.ieentities.ExcelIEEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +17,6 @@ public class ExtractedEbookText extends BervanBaseEntity<UUID>
     @Id
     private UUID id;
     @NotNull
-    @VaadinBervanColumn(internalName = "ebookName", displayName = "Ebook Name")
     private String ebookName;
     @Lob
     @Size(max = 500000000)
@@ -30,12 +28,12 @@ public class ExtractedEbookText extends BervanBaseEntity<UUID>
 
     private Boolean deleted = false;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     @Override
     public String getTableFilterableColumnValue() {
+        return content;
+    }
+
+    public String getContent() {
         return content;
     }
 
@@ -43,12 +41,12 @@ public class ExtractedEbookText extends BervanBaseEntity<UUID>
         this.content = value;
     }
 
-    public String getContent() {
-        return content;
-    }
-
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @Override
