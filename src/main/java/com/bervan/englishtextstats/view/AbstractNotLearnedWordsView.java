@@ -3,7 +3,6 @@ package com.bervan.englishtextstats.view;
 import com.bervan.common.config.BervanViewConfig;
 import com.bervan.common.search.SearchRequest;
 import com.bervan.common.service.AuthService;
-import com.bervan.core.model.BervanLogger;
 import com.bervan.englishtextstats.EnglishTextLayout;
 import com.bervan.englishtextstats.Word;
 import com.bervan.englishtextstats.service.ExtractedEbookTextRepository;
@@ -39,8 +38,8 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
     private String globalTmpDir;
 
     public AbstractNotLearnedWordsView(WordService service, ExtractedEbookTextRepository extractedEbookTextRepository, TextNotKnownWordsService textNotKnownWordsService,
-                                       BervanLogger log, AddAsFlashcardService addAsFlashcardService, BervanViewConfig bervanViewConfig) {
-        super(service, log, new EnglishTextLayout(ROUTE_NAME), addAsFlashcardService, "EN", bervanViewConfig);
+                                       AddAsFlashcardService addAsFlashcardService, BervanViewConfig bervanViewConfig) {
+        super(service, new EnglishTextLayout(ROUTE_NAME), addAsFlashcardService, "EN", bervanViewConfig);
         this.extractedEbookTextRepository = extractedEbookTextRepository;
         this.textNotKnownWordsService = textNotKnownWordsService;
         renderCommonComponents();

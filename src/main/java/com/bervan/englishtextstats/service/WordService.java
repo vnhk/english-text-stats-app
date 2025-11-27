@@ -3,7 +3,6 @@ package com.bervan.englishtextstats.service;
 import com.bervan.common.search.SearchRequest;
 import com.bervan.common.search.model.SortDirection;
 import com.bervan.common.service.BaseService;
-import com.bervan.core.model.BervanLogger;
 import com.bervan.englishtextstats.Word;
 import com.bervan.ieentities.ExcelIEEntity;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +15,12 @@ import java.util.UUID;
 @Service
 public class WordService extends BaseService<UUID, Word> {
     private TextNotKnownWordsService textNotKnownWordsService;
-    private final BervanLogger log;
 
-    public WordService(TextNotKnownWordsService textNotKnownWordsService, BervanLogger log) {
+
+    public WordService(TextNotKnownWordsService textNotKnownWordsService) {
         super(null, null);
         this.textNotKnownWordsService = textNotKnownWordsService;
-        this.log = log;
+
     }
 
     @Override

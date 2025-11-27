@@ -3,10 +3,10 @@ package com.bervan.englishtextstats.service;
 import com.bervan.common.search.SearchService;
 import com.bervan.common.service.AuthService;
 import com.bervan.common.service.BaseService;
-import com.bervan.core.model.BervanLogger;
 import com.bervan.englishtextstats.ExtractedEbookText;
 import com.bervan.englishtextstats.KnownWord;
 import com.bervan.englishtextstats.Word;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,17 +19,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
-    private final BervanLogger logger;
     private final ExtractedEbookTextRepository extractedEbookTextRepository;
     private final Map<UUID, List<KnownWord>> inMemoryWordsForUser = new ConcurrentHashMap<>();
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
 
     public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository, KnownWordRepository knownWordRepository,
-                                    SearchService searchService, BervanLogger logger, @Value("${file.service.storage.folder}") String pathToFileStorage) {
+                                    SearchService searchService, @Value("${file.service.storage.folder}") String pathToFileStorage) {
         super(knownWordRepository, searchService);
-        this.logger = logger;
         this.pathToFileStorage = pathToFileStorage;
         this.extractedEbookTextRepository = extractedEbookTextRepository;
     }
@@ -84,7 +83,7 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
 
     private List<Word> processTextAndGetNotKnownWords(int howMany, String extractedText) {
         try {
-            logger.info("Extracted Ebook text length: " + extractedText.length());
+            log.info("Extracted Ebook text length: " + extractedText.length());
             UUID loggedUserId = AuthService.getLoggedUserId();
             ConcurrentMap<String, Long> wordCounterComplete = Arrays.stream(extractedText.toLowerCase().split("\\W+"))
                     .parallel()
@@ -103,11 +102,11 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
                     .map(entry -> new Word(entry.getKey(), entry.getValue(), null))
                     .collect(Collectors.toList());
 
-            logger.info("All Words Not Learned: " + sortedWordsComplete.size());
+            log.info("All Words Not Learned: " + sortedWordsComplete.size());
 
             return resultReduced;
         } catch (Exception e) {
-            logger.error("Could not extract English words.", e);
+            log.error("Could not extract English words.", e);
             throw new RuntimeException("Could not extract English words.", e);
         }
     }

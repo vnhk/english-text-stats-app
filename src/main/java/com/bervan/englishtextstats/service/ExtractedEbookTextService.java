@@ -2,8 +2,8 @@ package com.bervan.englishtextstats.service;
 
 import com.bervan.common.search.SearchService;
 import com.bervan.common.service.BaseService;
-import com.bervan.core.model.BervanLogger;
 import com.bervan.englishtextstats.ExtractedEbookText;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +16,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
+@Slf4j
 public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookText> {
-    private final BervanLogger logger;
 
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
@@ -26,9 +26,8 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
     private String pathToConfigFolder;
 
 
-    public ExtractedEbookTextService(ExtractedEbookTextRepository extractedEbookTextRepository, SearchService searchService, BervanLogger logger) {
+    public ExtractedEbookTextService(ExtractedEbookTextRepository extractedEbookTextRepository, SearchService searchService) {
         super(extractedEbookTextRepository, searchService);
-        this.logger = logger;
     }
 
     @Override
@@ -43,7 +42,7 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
 
     private String getEbookText(String filename) {
         String filePath = pathToFileStorage + pathToConfigFolder + File.separator + filename;
-        logger.info("Loading file: " + filePath);
+        log.info("Loading file: " + filePath);
         return extractText(filePath);
     }
 
