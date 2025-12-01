@@ -3,21 +3,20 @@ package com.bervan.englishtextstats.service;
 import com.bervan.common.search.SearchService;
 import com.bervan.common.service.BaseService;
 import com.bervan.englishtextstats.ExtractedEbookText;
-import lombok.extern.slf4j.Slf4j;
+import com.bervan.logging.JsonLogger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
-@Slf4j
 public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookText> {
+    private final JsonLogger log = JsonLogger.getLogger(getClass());
 
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;
@@ -29,23 +28,6 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
     public ExtractedEbookTextService(ExtractedEbookTextRepository extractedEbookTextRepository, SearchService searchService) {
         super(extractedEbookTextRepository, searchService);
     }
-
-    @Override
-    public ExtractedEbookText save(ExtractedEbookText data) {
-        String ebookName = data.getEbookName();
-
-        String path = ebookName;
-        data.setContent(getEbookText(path));
-
-        return super.save(data);
-    }
-
-    private String getEbookText(String filename) {
-        String filePath = pathToFileStorage + pathToConfigFolder + File.separator + filename;
-        log.info("Loading file: " + filePath);
-        return extractText(filePath);
-    }
-
 
     public static String extractText(String filePath) {
         StringBuilder textContent = new StringBuilder();
@@ -97,7 +79,6 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
         return textContent.toString();
     }
 
-
     private static String extractTextFromEntry(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
         StringBuilder content = new StringBuilder();
@@ -116,5 +97,21 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
             }
         }
         return content.toString();
+    }
+
+    @Override
+    public ExtractedEbookText save(ExtractedEbookText data) {
+        String ebookName = data.getEbookName();
+
+        String path = ebookName;
+        data.setContent(getEbookText(path));
+
+        return super.save(data);
+    }
+
+    private String getEbookText(String filename) {
+        String filePath = pathToFileStorage + pathToConfigFolder + File.separator + filename;
+        log.info("Loading file: " + filePath);
+        return extractText(filePath);
     }
 }

@@ -9,13 +9,13 @@ import com.bervan.englishtextstats.service.ExtractedEbookTextRepository;
 import com.bervan.englishtextstats.service.TextNotKnownWordsService;
 import com.bervan.englishtextstats.service.WordService;
 import com.bervan.languageapp.service.AddAsFlashcardService;
+import com.bervan.logging.JsonLogger;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
@@ -26,11 +26,11 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWordsBaseView {
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
     protected final ExtractedEbookTextRepository extractedEbookTextRepository;
     protected final TextNotKnownWordsService textNotKnownWordsService;
+    private final JsonLogger log = JsonLogger.getLogger(getClass());
     protected UUID selectedEbookId;
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;

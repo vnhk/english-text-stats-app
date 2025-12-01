@@ -6,7 +6,7 @@ import com.bervan.common.service.BaseService;
 import com.bervan.englishtextstats.ExtractedEbookText;
 import com.bervan.englishtextstats.KnownWord;
 import com.bervan.englishtextstats.Word;
-import lombok.extern.slf4j.Slf4j;
+import com.bervan.logging.JsonLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
+    private final JsonLogger log = JsonLogger.getLogger(getClass());
     private final ExtractedEbookTextRepository extractedEbookTextRepository;
     private final Map<UUID, List<KnownWord>> inMemoryWordsForUser = new ConcurrentHashMap<>();
     @Value("${file.service.storage.folder}")
