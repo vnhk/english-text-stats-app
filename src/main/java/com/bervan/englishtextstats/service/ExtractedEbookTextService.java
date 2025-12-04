@@ -16,7 +16,7 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookText> {
-    private final JsonLogger log = JsonLogger.getLogger(getClass());
+    private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
 
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;

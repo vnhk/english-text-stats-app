@@ -30,7 +30,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
     protected final ExtractedEbookTextRepository extractedEbookTextRepository;
     protected final TextNotKnownWordsService textNotKnownWordsService;
-    private final JsonLogger log = JsonLogger.getLogger(getClass());
+    private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
     protected UUID selectedEbookId;
     @Value("${file.service.storage.folder}")
     private String pathToFileStorage;

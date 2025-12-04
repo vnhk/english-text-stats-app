@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
-    private final JsonLogger log = JsonLogger.getLogger(getClass());
+    private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
     private final ExtractedEbookTextRepository extractedEbookTextRepository;
     private final Map<UUID, List<KnownWord>> inMemoryWordsForUser = new ConcurrentHashMap<>();
     @Value("${file.service.storage.folder}")
