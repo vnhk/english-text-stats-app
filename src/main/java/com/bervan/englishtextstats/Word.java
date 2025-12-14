@@ -1,11 +1,9 @@
 package com.bervan.englishtextstats;
 
 import com.bervan.common.model.PersistableTableData;
-import com.bervan.common.user.User;
 import com.bervan.languageapp.service.FlashcardDetails;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 public class Word implements PersistableTableData<UUID>, FlashcardDetails {
@@ -35,37 +33,12 @@ public class Word implements PersistableTableData<UUID>, FlashcardDetails {
     }
 
     @Override
-    public Set<User> getOwners() {
-        return null;
-    }
+    public void setId(UUID uuid) {
 
-    @Override
-    public void addOwner(User user) {
-
-    }
-
-    @Override
-    public void removeOwner(User user) {
-
-    }
-
-    @Override
-    public boolean hasAccess(User user) {
-        return true;
-    }
-
-    @Override
-    public boolean hasAccess(UUID loggedUserId) {
-        return false;
     }
 
     @Override
     public void setDeleted(Boolean value) {
-
-    }
-
-    @Override
-    public void setId(UUID uuid) {
 
     }
 

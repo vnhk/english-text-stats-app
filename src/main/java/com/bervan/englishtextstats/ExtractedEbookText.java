@@ -1,7 +1,7 @@
 package com.bervan.englishtextstats;
 
-import com.bervan.common.model.BervanBaseEntity;
-import com.bervan.common.model.PersistableTableData;
+import com.bervan.common.model.BervanOwnedBaseEntity;
+import com.bervan.common.model.PersistableTableOwnedData;
 import com.bervan.ieentities.ExcelIEEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -12,8 +12,8 @@ import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class ExtractedEbookText extends BervanBaseEntity<UUID>
-        implements PersistableTableData<UUID>, ExcelIEEntity<UUID> {
+public class ExtractedEbookText extends BervanOwnedBaseEntity<UUID>
+        implements PersistableTableOwnedData<UUID>, ExcelIEEntity<UUID> {
     @Id
     private UUID id;
     @NotNull
