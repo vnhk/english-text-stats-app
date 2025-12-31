@@ -23,11 +23,11 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
     private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
     private final ExtractedEbookTextRepository extractedEbookTextRepository;
     private final Map<UUID, List<KnownWord>> inMemoryWordsForUser = new ConcurrentHashMap<>();
-    @Value("${file.service.storage.folder}")
+    @Value("${file.service.storage.folder.main}")
     private String pathToFileStorage;
 
     public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository, KnownWordRepository knownWordRepository,
-                                    SearchService searchService, @Value("${file.service.storage.folder}") String pathToFileStorage) {
+                                    SearchService searchService, @Value("${file.service.storage.folder.main}") String pathToFileStorage) {
         super(knownWordRepository, searchService);
         this.pathToFileStorage = pathToFileStorage;
         this.extractedEbookTextRepository = extractedEbookTextRepository;

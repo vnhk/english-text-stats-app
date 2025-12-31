@@ -18,7 +18,7 @@ import java.util.zip.ZipInputStream;
 public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookText> {
     private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
 
-    @Value("${file.service.storage.folder}")
+    @Value("${file.service.storage.folder.main}")
     private String pathToFileStorage;
 
     @Value("${ebook-not-known-words.file-storage-relative-path}")

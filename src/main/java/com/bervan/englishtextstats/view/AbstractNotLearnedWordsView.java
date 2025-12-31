@@ -32,7 +32,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
     protected final TextNotKnownWordsService textNotKnownWordsService;
     private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
     protected UUID selectedEbookId;
-    @Value("${file.service.storage.folder}")
+    @Value("${file.service.storage.folder.main}")
     private String pathToFileStorage;
     @Value("${global-tmp-dir.file-storage-relative-path}")
     private String globalTmpDir;
