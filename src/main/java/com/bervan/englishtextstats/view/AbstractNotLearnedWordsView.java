@@ -44,7 +44,7 @@ public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWord
         this.textNotKnownWordsService = textNotKnownWordsService;
         renderCommonComponents();
 
-        contentLayout.remove(newItemButton);
+        newItemButton.setVisible(false);
         HorizontalLayout horizontalLayout = new HorizontalLayout(JustifyContentMode.BETWEEN, buildEbookComboBox(), new VerticalLayout(new H4("Upload Known Words:"), buildUploadKnownWords()));
         horizontalLayout.setWidthFull();
         add(horizontalLayout);
