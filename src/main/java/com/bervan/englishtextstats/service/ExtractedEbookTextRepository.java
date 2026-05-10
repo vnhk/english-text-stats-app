@@ -2,7 +2,10 @@ package com.bervan.englishtextstats.service;
 
 import com.bervan.englishtextstats.ExtractedEbookText;
 import com.bervan.history.model.BaseRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,6 +22,11 @@ public interface ExtractedEbookTextRepository extends BaseRepository<ExtractedEb
             "AND o.id = :ownerId"
     )
     List<EbookSummary> findAllAvailable(UUID ownerId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ExtractedEbookText e SET e.deleted = true WHERE e.id = :id")
+    void softDeleteById(@Param("id") UUID id);
 
     interface EbookSummary {
         UUID getId();
