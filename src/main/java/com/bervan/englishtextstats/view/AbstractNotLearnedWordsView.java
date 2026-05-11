@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 public abstract class AbstractNotLearnedWordsView extends AbstractNotLearnedWordsBaseView {
     public static final String ROUTE_NAME = "english-ebook-words/not-learned-yet";
     protected final ExtractedEbookTextRepository extractedEbookTextRepository;

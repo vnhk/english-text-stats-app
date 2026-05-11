@@ -5,6 +5,7 @@ import com.bervan.englishtextstats.view.AbstractEbooksView;
 import com.bervan.englishtextstats.view.AbstractNotLearnedWordsView;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
+@Deprecated
 public class EnglishTextLayout extends MenuNavigationComponent {
     public EnglishTextLayout(String routeName) {
         super(routeName);
