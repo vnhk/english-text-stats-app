@@ -18,7 +18,7 @@ public interface ExtractedEbookTextRepository extends BaseRepository<ExtractedEb
 
     @Query("SELECT e.id AS id, e.ebookName AS name FROM ExtractedEbookText e " +
             "JOIN e.owners o " +
-            "WHERE (e.deleted IS FALSE OR e.deleted IS NULL) " +
+            "WHERE (e.deleted = false OR e.deleted IS NULL) " +
             "AND o.id = :ownerId"
     )
     List<EbookSummary> findAllAvailable(UUID ownerId);
