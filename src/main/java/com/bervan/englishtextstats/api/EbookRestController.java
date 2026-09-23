@@ -49,7 +49,7 @@ public class EbookRestController {
     public ResponseEntity<List<EbookDto>> listEbooks() {
         UUID userId = AuthService.getLoggedUserId();
         List<EbookDto> dtos = extractedEbookTextRepository.findAllAvailable(userId).stream()
-                .map(s -> new EbookDto(s.getId(), s.getName(), null, null))
+                .map(s -> new EbookDto(s.getId(), s.getEbookName(), s.getCreationDate(), s.getModificationDate()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }

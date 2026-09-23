@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -24,33 +27,37 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
     @Value("${ebook-not-known-words.file-storage-relative-path}")
     private String pathToConfigFolder;
 
-
     public ExtractedEbookTextService(ExtractedEbookTextRepository extractedEbookTextRepository, SearchService searchService) {
         super(extractedEbookTextRepository, searchService);
     }
 
     public static String extractText(String filePath) {
         StringBuilder textContent = new StringBuilder();
-        if (filePath.endsWith(".epub")) {
+        String lowerPath = filePath.toLowerCase();
+        if (lowerPath.endsWith(".epub")) {
             try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath))) {
                 ZipEntry entry;
                 while ((entry = zipInputStream.getNextEntry()) != null) {
-                    if (entry.getName().endsWith(".xhtml") || entry.getName().endsWith(".html") || entry.getName().endsWith(".htm")) {
-                        textContent.append(extractTextFromEntry(zipInputStream));
+                    String name = entry.getName().toLowerCase();
+                    if (name.endsWith(".xhtml") || name.endsWith(".html") || name.endsWith(".htm") || name.endsWith(".xml")) {
+                        byte[] bytes = zipInputStream.readAllBytes();
+                        String html = new String(bytes, StandardCharsets.UTF_8);
+                        String text = stripHtml(html);
+                        textContent.append(text).append("\n");
                     }
                     zipInputStream.closeEntry();
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error!", e);
+                throw new RuntimeException("Error reading epub: " + filePath, e);
             }
-        } else if (filePath.endsWith(".pdf")) {
+        } else if (lowerPath.endsWith(".pdf")) {
             try (PDDocument document = PDDocument.load(new File(filePath))) {
                 PDFTextStripper pdfStripper = new PDFTextStripper();
                 textContent.append(pdfStripper.getText(document));
             } catch (IOException e) {
-                throw new RuntimeException("Error!", e);
+                throw new RuntimeException("Error reading pdf: " + filePath, e);
             }
-        } else if (filePath.endsWith(".vtt")) {
+        } else if (lowerPath.endsWith(".vtt")) {
             try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -59,9 +66,9 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error!", e);
+                throw new RuntimeException("Error reading vtt: " + filePath, e);
             }
-        } else if (filePath.endsWith(".srt")) {
+        } else if (lowerPath.endsWith(".srt")) {
             try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -70,48 +77,94 @@ public class ExtractedEbookTextService extends BaseService<UUID, ExtractedEbookT
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error!", e);
+                throw new RuntimeException("Error reading srt: " + filePath, e);
             }
         } else {
-            throw new RuntimeException("File extension is unsupported!");
+            throw new RuntimeException("File extension is unsupported: " + filePath);
         }
 
         return textContent.toString();
     }
 
-    private static String extractTextFromEntry(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-        StringBuilder content = new StringBuilder();
-        String line;
-
-        boolean insideBody = false;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("<body")) {
-                insideBody = true;
-            }
-            if (insideBody) {
-                content.append(line.replaceAll("<[^>]+>", "")).append("\n");
-            }
-            if (line.contains("</body>")) {
-                insideBody = false;
+    private static String stripHtml(String html) {
+        if (html == null || html.isBlank()) return "";
+        String bodyContent = html;
+        int bodyStart = html.toLowerCase().indexOf("<body");
+        if (bodyStart != -1) {
+            int bodyTagEnd = html.indexOf(">", bodyStart);
+            int bodyEnd = html.toLowerCase().lastIndexOf("</body>");
+            if (bodyTagEnd != -1 && bodyEnd > bodyTagEnd) {
+                bodyContent = html.substring(bodyTagEnd + 1, bodyEnd);
+            } else if (bodyTagEnd != -1) {
+                bodyContent = html.substring(bodyTagEnd + 1);
             }
         }
-        return content.toString();
+
+        // Strip scripts and styles
+        bodyContent = bodyContent.replaceAll("(?is)<script.*?</script>", " ");
+        bodyContent = bodyContent.replaceAll("(?is)<style.*?</style>", " ");
+
+        // Replace HTML tags with space so words don't get merged
+        String text = bodyContent.replaceAll("<[^>]+>", " ");
+
+        // Decode common HTML entities
+        text = text.replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&#8217;", "'")
+                .replace("&#8216;", "'")
+                .replace("&#8220;", "\"")
+                .replace("&#8221;", "\"")
+                .replace("&rsquo;", "'")
+                .replace("&lsquo;", "'")
+                .replace("&rdquo;", "\"")
+                .replace("&ldquo;", "\"");
+        return text;
     }
 
     @Override
     public ExtractedEbookText save(ExtractedEbookText data) {
         String ebookName = data.getEbookName();
-
-        String path = ebookName;
-        data.setContent(getEbookText(path));
-
+        if (data.getContent() == null || data.getContent().isBlank()) {
+            data.setContent(getEbookText(ebookName));
+        }
         return super.save(data);
     }
 
-    private String getEbookText(String filename) {
-        String filePath = pathToFileStorage + pathToConfigFolder + File.separator + filename;
-        log.info("Loading file: " + filePath);
-        return extractText(filePath);
+    public String getEbookText(String filename) {
+        if (filename == null || filename.isBlank()) return "";
+
+        List<File> candidates = new ArrayList<>();
+        candidates.add(new File(filename));
+
+        String relFolder = pathToConfigFolder != null ? pathToConfigFolder.replaceFirst("^[/\\\\]+", "") : "";
+        if (pathToFileStorage != null) {
+            candidates.add(new File(pathToFileStorage + File.separator + relFolder + File.separator + filename));
+            candidates.add(new File(pathToFileStorage + File.separator + filename));
+            if (pathToConfigFolder != null) {
+                candidates.add(new File(pathToFileStorage + pathToConfigFolder + File.separator + filename));
+            }
+        }
+
+        candidates.add(new File("files/epubs-config" + File.separator + filename));
+        candidates.add(new File("files" + File.separator + filename));
+        candidates.add(new File("epubs" + File.separator + filename));
+        candidates.add(new File("english-text-stats-app/epubs" + File.separator + filename));
+        candidates.add(new File("file-storage-app/epubs" + File.separator + filename));
+
+        for (File candidate : candidates) {
+            if (candidate.exists() && candidate.isFile()) {
+                log.info("Found ebook file at: {}", candidate.getAbsolutePath());
+                return extractText(candidate.getAbsolutePath());
+            }
+        }
+
+        String fallbackPath = (pathToFileStorage != null ? pathToFileStorage : "")
+                + File.separator + relFolder + File.separator + filename;
+        log.warn("Ebook file not found in candidates, trying fallback: {}", fallbackPath);
+        return extractText(fallbackPath);
     }
 }

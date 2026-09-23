@@ -22,15 +22,20 @@ import java.util.stream.Collectors;
 public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
     private final JsonLogger log = JsonLogger.getLogger(getClass(), "english-ebook");
     private final ExtractedEbookTextRepository extractedEbookTextRepository;
+    private final ExtractedEbookTextService extractedEbookTextService;
     private final Map<UUID, List<KnownWord>> inMemoryWordsForUser = new ConcurrentHashMap<>();
     @Value("${file.service.storage.folder.main}")
     private String pathToFileStorage;
 
-    public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository, KnownWordRepository knownWordRepository,
-                                    SearchService searchService, @Value("${file.service.storage.folder.main}") String pathToFileStorage) {
+    public TextNotKnownWordsService(ExtractedEbookTextRepository extractedEbookTextRepository,
+                                    ExtractedEbookTextService extractedEbookTextService,
+                                    KnownWordRepository knownWordRepository,
+                                    SearchService searchService,
+                                    @Value("${file.service.storage.folder.main}") String pathToFileStorage) {
         super(knownWordRepository, searchService);
         this.pathToFileStorage = pathToFileStorage;
         this.extractedEbookTextRepository = extractedEbookTextRepository;
+        this.extractedEbookTextService = extractedEbookTextService;
     }
 
     public void markAsLearned(String word) {
@@ -38,9 +43,9 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
             return;
         }
 
-        word = word.trim();
-        KnownWord knownWord = new KnownWord();
+        word = word.trim().toLowerCase();
         if (!existsByValue(word)) {
+            KnownWord knownWord = new KnownWord();
             knownWord.setValue(word);
             knownWord = repository.save(knownWord);
             updateInMemoryWords(Collections.singletonList(knownWord));
@@ -48,49 +53,80 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
     }
 
     private boolean existsByValue(String word) {
-        if (inMemoryWordsForUser.get(AuthService.getLoggedUserId()) == null) {
+        UUID userId = AuthService.getLoggedUserId();
+        if (inMemoryWordsForUser.get(userId) == null) {
             loadIntoMemory();
         }
-        return inMemoryWordsForUser.get(AuthService.getLoggedUserId()).stream()
-                .anyMatch(e -> e.getValue().equalsIgnoreCase(word));
+        List<KnownWord> userWords = inMemoryWordsForUser.get(userId);
+        if (userWords == null) {
+            return false;
+        }
+        return userWords.stream()
+                .filter(Objects::nonNull)
+                .map(KnownWord::getValue)
+                .filter(Objects::nonNull)
+                .anyMatch(e -> e.equalsIgnoreCase(word));
     }
 
     protected void updateInMemoryWords(Collection<KnownWord> toBeAdded) {
-        toBeAdded.forEach(e -> e.setValue(e.getValue().toLowerCase()));
-        inMemoryWordsForUser.computeIfAbsent(AuthService.getLoggedUserId(), k -> new ArrayList<>());
-        inMemoryWordsForUser.get(AuthService.getLoggedUserId()).addAll(toBeAdded);
+        if (toBeAdded == null) return;
+        List<KnownWord> sanitized = toBeAdded.stream()
+                .filter(e -> e != null && e.getValue() != null && !e.getValue().isBlank())
+                .map(e -> {
+                    KnownWord copy = new KnownWord();
+                    copy.setId(e.getId());
+                    copy.setValue(e.getValue().trim().toLowerCase());
+                    return copy;
+                })
+                .collect(Collectors.toList());
+
+        UUID userId = AuthService.getLoggedUserId();
+        inMemoryWordsForUser.computeIfAbsent(userId, k -> new ArrayList<>());
+        inMemoryWordsForUser.get(userId).addAll(sanitized);
     }
 
     public List<Word> getNotLearnedWords(int howMany, String englishSubtitlesPath) {
-        if (inMemoryWordsForUser.get(AuthService.getLoggedUserId()) == null) {
+        UUID userId = AuthService.getLoggedUserId();
+        if (inMemoryWordsForUser.get(userId) == null) {
             loadIntoMemory();
         }
 
         String extractedText = getEbookText(englishSubtitlesPath);
-
         return processTextAndGetNotKnownWords(howMany, extractedText);
     }
 
     public List<Word> getNotLearnedWords(int howMany, UUID ebookId) {
-        if (inMemoryWordsForUser.get(AuthService.getLoggedUserId()) == null) {
+        UUID userId = AuthService.getLoggedUserId();
+        if (inMemoryWordsForUser.get(userId) == null) {
             loadIntoMemory();
         }
 
         String extractedText = getEbookText(ebookId);
-
         return processTextAndGetNotKnownWords(howMany, extractedText);
     }
 
     private List<Word> processTextAndGetNotKnownWords(int howMany, String extractedText) {
         try {
+            if (extractedText == null || extractedText.isBlank()) {
+                log.warn("Extracted Ebook text is empty!");
+                return Collections.emptyList();
+            }
+
             log.info("Extracted Ebook text length: " + extractedText.length());
             UUID loggedUserId = AuthService.getLoggedUserId();
-            ConcurrentMap<String, Long> wordCounterComplete = Arrays.stream(extractedText.toLowerCase().split("\\W+"))
+            List<KnownWord> userWords = inMemoryWordsForUser.getOrDefault(loggedUserId, Collections.emptyList());
+            Set<String> learnedWordsSet = userWords.stream()
+                    .filter(Objects::nonNull)
+                    .map(KnownWord::getValue)
+                    .filter(Objects::nonNull)
+                    .map(w -> w.trim().toLowerCase())
+                    .collect(Collectors.toSet());
+
+            ConcurrentMap<String, Long> wordCounterComplete = Arrays.stream(extractedText.toLowerCase().split("[^a-zA-Z]+"))
                     .parallel()
-                    .filter(word -> word.length() > 0)
+                    .filter(word -> word != null && word.length() > 1)
                     .map(String::trim)
-                    .filter(word -> !isLearned(word, inMemoryWordsForUser.get(loggedUserId).stream().map(KnownWord::getValue)
-                            .collect(Collectors.toList())))
+                    .filter(word -> !isLearned(word, learnedWordsSet))
                     .collect(Collectors.groupingByConcurrent(Function.identity(), Collectors.counting()));
 
             List<Map.Entry<String, Long>> sortedWordsComplete = wordCounterComplete.entrySet().stream()
@@ -115,47 +151,57 @@ public class TextNotKnownWordsService extends BaseService<UUID, KnownWord> {
         updateInMemoryWords(load(Pageable.ofSize(100000000)));
     }
 
-    private boolean isLearned(String word, List<String> learnedWords) {
-        try {
-            Double.parseDouble(word);
+    private boolean isLearned(String word, Set<String> learnedWords) {
+        if (word == null || word.isBlank()) {
             return true;
-        } catch (NumberFormatException ignored) {
-        } //filter numbers out
-
+        }
         word = word.trim().toLowerCase();
-        if (word.equals("true")) {
+        if (word.length() <= 1 && !word.equals("a") && !word.equals("i")) {
             return true;
         }
-        if (word.endsWith("s") && learnedWords.contains(word.substring(0, word.length() - 1))) {
+        if (learnedWords.contains(word)) {
             return true;
         }
-        if (word.endsWith("ed")) {
+        if (word.endsWith("s") && word.length() > 2 && learnedWords.contains(word.substring(0, word.length() - 1))) {
+            return true;
+        }
+        if (word.endsWith("ed") && word.length() > 3) {
             String baseWord = word.substring(0, word.length() - 2);
             if (learnedWords.contains(baseWord) || learnedWords.contains(baseWord + "e")) {
                 return true;
             }
         }
-        if (word.endsWith("ing")) {
+        if (word.endsWith("ing") && word.length() > 4) {
             String baseWord = word.substring(0, word.length() - 3);
             if (learnedWords.contains(baseWord) || learnedWords.contains(baseWord + "e")) {
                 return true;
             }
         }
-        if (word.endsWith("ly") && learnedWords.contains(word.substring(0, word.length() - 2))) {
+        if (word.endsWith("ly") && word.length() > 3 && learnedWords.contains(word.substring(0, word.length() - 2))) {
             return true;
         }
-        if (word.endsWith("ies") && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) {
+        if (word.endsWith("ies") && word.length() > 4 && learnedWords.contains(word.substring(0, word.length() - 3) + "y")) {
             return true;
         }
-        return learnedWords.contains(word);
+        return false;
     }
 
     private String getEbookText(UUID id) {
         Optional<ExtractedEbookText> byEbook = extractedEbookTextRepository.findById(id);
         if (byEbook.isPresent()) {
-            return byEbook.get().getContent();
+            ExtractedEbookText ebook = byEbook.get();
+            if (ebook.getContent() == null || ebook.getContent().isBlank()) {
+                log.info("Ebook content in DB is empty for id {}. Attempting re-extraction...", id);
+                String content = extractedEbookTextService.getEbookText(ebook.getEbookName());
+                if (content != null && !content.isBlank()) {
+                    ebook.setContent(content);
+                    extractedEbookTextRepository.save(ebook);
+                }
+                return content != null ? content : "";
+            }
+            return ebook.getContent();
         } else {
-            throw new RuntimeException("Could not find ebook by id!");
+            throw new RuntimeException("Could not find ebook by id: " + id);
         }
     }
 
